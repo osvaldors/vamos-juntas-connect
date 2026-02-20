@@ -5,8 +5,7 @@ import MembersCarousel from "@/components/public/MembersCarousel";
 import EventsSection from "@/components/public/EventsSection";
 import BookClubSection from "@/components/public/BookClubSection";
 import PartnersCarousel from "@/components/public/PartnersCarousel";
-import ShopSection from "@/components/public/ShopSection";
-import GymRatsSection from "@/components/public/GymRatsSection";
+import BenefitsSection from "@/components/public/BenefitsSection";
 import PricingSection from "@/components/public/PricingSection";
 import FAQSection from "@/components/public/FAQSection";
 import TestimonialsSection from "@/components/public/TestimonialsSection";
@@ -24,8 +23,7 @@ const Index = () => {
         <EventsSection />
         <BookClubSection />
         <PartnersCarousel />
-        <ShopSection />
-        <GymRatsSection />
+        <BenefitsSection />
         <PricingSection />
         <FAQSection />
         <TestimonialsSection />

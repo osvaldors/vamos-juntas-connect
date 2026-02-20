@@ -26,7 +26,7 @@ const HeroSection = () => {
   const banner = activeBanners[current];
 
   return (
-    <section id="inicio" className="relative h-[40vh] md:h-[40vh] overflow-hidden bg-background">
+    <section id="inicio" className="relative pt-16 md:pt-20 pb-10 overflow-hidden bg-background">
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id}
@@ -41,11 +41,11 @@ const HeroSection = () => {
             alt={banner.title}
             className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/80 to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/70 md:bg-gradient-to-r md:from-background md:via-background/90 md:to-background/40" />
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
+      <div className="relative z-10 container mx-auto px-4 flex items-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={banner.id + "-text"}
@@ -53,12 +53,12 @@ const HeroSection = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.5 }}
-            className="max-w-xl"
+            className="max-w-xl py-10 md:py-16"
           >
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-foreground mb-4 leading-tight whitespace-pre-line">
               {banner.title}
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-md">
+            <p className="text-muted-foreground text-base md:text-lg mb-6 max-w-md">
               {banner.subtitle}
             </p>
             {banner.cta && (

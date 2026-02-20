@@ -13,10 +13,28 @@ const FAQSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { faqs } = useData();
 
-  if (faqs.length === 0) return null;
+  const fallbackFaqs = [
+    {
+      id: "fallback-1",
+      question: "Quem pode participar do Vamos Juntas Club?",
+      answer: "Toda mulher que queira fazer parte de uma comunidade acolhedora, independente de idade, profissão ou cidade.",
+    },
+    {
+      id: "fallback-2",
+      question: "Como funcionam os encontros?",
+      answer: "Realizamos encontros presenciais e/ou online, com temas variados como desenvolvimento pessoal, leitura e bem-estar.",
+    },
+    {
+      id: "fallback-3",
+      question: "A assinatura tem fidelidade?",
+      answer: "Não. Você pode cancelar quando quiser diretamente pelo meio de pagamento utilizado na assinatura.",
+    },
+  ];
+
+  const items = faqs.length > 0 ? faqs : fallbackFaqs;
 
   return (
-    <section id="faq" className="py-24 bg-background" ref={ref}>
+    <section id="faq" className="py-24 bg-muted" ref={ref}>
       <div className="container mx-auto px-4 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -36,7 +54,7 @@ const FAQSection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Accordion type="single" collapsible className="space-y-3">
-            {faqs.map((faq) => (
+            {items.map((faq) => (
               <AccordionItem
                 key={faq.id}
                 value={faq.id}

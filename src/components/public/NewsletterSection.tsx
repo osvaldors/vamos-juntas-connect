@@ -20,7 +20,7 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section id="contato" className="py-24 bg-background" ref={ref}>
+    <section id="contato" className="py-24 bg-muted" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

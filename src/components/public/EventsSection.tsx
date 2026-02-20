@@ -16,7 +16,7 @@ const EventsSection = () => {
   };
 
   return (
-    <section id="eventos" className="py-24 bg-background" ref={ref}>
+    <section id="eventos" className="py-24 bg-muted" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -30,7 +30,7 @@ const EventsSection = () => {
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {events.slice(0, 6).map((event, i) => (
             <motion.div
               key={event.id}

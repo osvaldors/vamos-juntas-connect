@@ -8,7 +8,7 @@ const ShopSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-20 gradient-soft" ref={ref}>
+    <section className="py-20 bg-background" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -16,8 +16,8 @@ const ShopSection = () => {
           transition={{ duration: 0.6 }}
           className="max-w-2xl mx-auto text-center"
         >
-          <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="h-8 w-8 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center mx-auto mb-6">
+            <ShoppingBag className="h-7 w-7 text-primary" />
           </div>
           <p className="font-accent italic text-primary text-lg mb-2">Exclusivo para você</p>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">

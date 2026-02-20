@@ -27,7 +27,7 @@ const PricingSection = () => {
   const savings = isAnnual ? "Economize 22% — equivale a R$ 23,32/mês" : null;
 
   return (
-    <section id="planos" className="py-24 bg-background" ref={ref}>
+    <section id="planos" className="py-24 bg-muted" ref={ref}>
       <div className="container mx-auto px-4 max-w-xl">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

@@ -21,7 +21,7 @@ const BookClubSection = () => {
   if (!currentBook) return null;
 
   return (
-    <section id="livro" className="py-24 gradient-soft" ref={ref}>
+    <section id="livro" className="py-24 bg-background" ref={ref}>
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div

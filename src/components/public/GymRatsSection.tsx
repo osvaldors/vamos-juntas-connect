@@ -16,8 +16,8 @@ const GymRatsSection = () => {
           transition={{ duration: 0.6 }}
           className="max-w-2xl mx-auto text-center"
         >
-          <div className="w-16 h-16 rounded-2xl gradient-warm flex items-center justify-center mx-auto mb-6">
-            <Dumbbell className="h-8 w-8 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center mx-auto mb-6">
+            <Dumbbell className="h-7 w-7 text-primary" />
           </div>
           <p className="font-accent italic text-primary text-lg mb-2">Mexa-se com a gente</p>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
