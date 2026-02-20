@@ -49,27 +49,44 @@ const PricingSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex items-center justify-center gap-3 mb-10"
+          className="flex flex-col items-center gap-2 mb-10"
         >
-          <span className={`text-sm font-medium transition-colors ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
-            Mensal
-          </span>
-          <button
-            onClick={() => setIsAnnual(!isAnnual)}
-            className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${isAnnual ? "bg-primary" : "bg-muted-foreground/30"}`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${isAnnual ? "translate-x-7" : "translate-x-0"}`}
-            />
-          </button>
-          <span className={`text-sm font-medium transition-colors ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
-            Anual
-          </span>
-          {isAnnual && (
-            <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
-              -22%
+          <div className="inline-flex items-center rounded-full bg-muted p-1 shadow-sm border border-border/60">
+            <button
+              type="button"
+              onClick={() => setIsAnnual(false)}
+              className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-full transition-all ${
+                !isAnnual
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAnnual(true)}
+              className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-full transition-all ${
+                isAnnual
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Anual
+            </button>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground">
+            <span>
+              {isAnnual
+                ? "Plano anual selecionado — melhor custo-benefício"
+                : "Pague mês a mês ou economize escolhendo o plano anual"}
             </span>
-          )}
+            {isAnnual && (
+              <span className="text-[10px] sm:text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
+                -22% OFF
+              </span>
+            )}
+          </div>
         </motion.div>
 
         {/* Card */}
