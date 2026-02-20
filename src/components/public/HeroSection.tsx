@@ -26,7 +26,7 @@ const HeroSection = () => {
   const banner = activeBanners[current];
 
   return (
-    <section id="inicio" className="relative h-[70vh] md:h-[60vh] overflow-hidden">
+    <section id="inicio" className="relative h-[40vh] md:h-[40vh] overflow-hidden bg-background">
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id}
@@ -39,9 +39,9 @@ const HeroSection = () => {
           <img
             src={banner.imageUrl || heroBg}
             alt={banner.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/80 to-background/40" />
         </motion.div>
       </AnimatePresence>
 
@@ -55,16 +55,16 @@ const HeroSection = () => {
             transition={{ duration: 0.5 }}
             className="max-w-xl"
           >
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-tight whitespace-pre-line">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-foreground mb-4 leading-tight whitespace-pre-line">
               {banner.title}
             </h1>
-            <p className="text-primary-foreground/85 text-base md:text-lg mb-8 max-w-md">
+            <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-md">
               {banner.subtitle}
             </p>
             {banner.cta && (
               <Button
                 size="lg"
-                className="gradient-warm border-0 text-primary-foreground rounded-full px-8 text-base shadow-lg hover:shadow-xl transition-all"
+                className="rounded-full px-8 text-base shadow-sm hover:shadow-md transition-all bg-foreground text-background"
               >
                 {banner.cta} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

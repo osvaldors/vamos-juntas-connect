@@ -24,7 +24,6 @@ const MembersCarousel = () => {
   const { members } = useData();
 
   const activeMembers = members.filter((m) => m.status === "active");
-  const displayMembers = [...activeMembers, ...activeMembers];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,10 +32,36 @@ const MembersCarousel = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const translateX = -(offset % (activeMembers.length * 200));
+  // Se ainda não há membros cadastrados, mostra apenas o título com uma mensagem suave
+  if (activeMembers.length === 0) {
+    return (
+      <section className="py-20 bg-background" ref={ref}>
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8"
+          >
+            <p className="font-accent italic text-primary text-lg mb-2">Nossa comunidade</p>
+            <h2 className="text-3xl md:text-5xl font-heading font-bold text-foreground">
+              Nossas <span className="text-gradient">Membros</span>
+            </h2>
+            <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto">
+              Em breve você verá aqui as mulheres que fazem parte do clube.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
+  const displayMembers = [...activeMembers, ...activeMembers];
+  const totalWidth = Math.max(activeMembers.length * 200, 1);
+  const translateX = -(offset % totalWidth);
 
   return (
-    <section className="py-20 bg-cream overflow-hidden" ref={ref}>
+    <section className="py-20 bg-background overflow-hidden" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -52,8 +77,8 @@ const MembersCarousel = () => {
       </div>
 
       <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-cream to-transparent z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-cream to-transparent z-10" />
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10" />
 
         <div
           className="flex gap-6 will-change-transform"

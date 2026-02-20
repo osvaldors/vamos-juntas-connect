@@ -24,17 +24,36 @@ const AdminEvents = () => {
 
   const handleSave = async () => {
     if (!form.title || !form.date) return;
-    if (editingId) {
-      await updateEvent(editingId, form);
-      toast({ title: "Evento atualizado!" });
-    } else {
-      await addEvent(form);
-      toast({ title: "Evento adicionado!" });
+    try {
+      if (editingId) {
+        await updateEvent(editingId, form);
+        toast({ title: "Evento atualizado!" });
+      } else {
+        await addEvent(form);
+        toast({ title: "Evento adicionado!" });
+      }
+      setOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar evento",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
     }
-    setOpen(false);
   };
 
-  const handleDelete = async (id: string) => { await deleteEvent(id); toast({ title: "Evento removido!" }); };
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEvent(id);
+      toast({ title: "Evento removido!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover evento",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const formatDate = (date: string) => {
     if (!date) return "";

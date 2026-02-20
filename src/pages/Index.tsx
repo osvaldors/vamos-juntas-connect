@@ -15,20 +15,22 @@ import Footer from "@/components/public/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
-      <HeroSection />
-      <AboutSection />
-      <MembersCarousel />
-      <EventsSection />
-      <BookClubSection />
-      <PartnersCarousel />
-      <ShopSection />
-      <GymRatsSection />
-      <PricingSection />
-      <FAQSection />
-      <TestimonialsSection />
-      <NewsletterSection />
+      <main className="mt-16 flex-1">
+        <HeroSection />
+        <AboutSection />
+        <MembersCarousel />
+        <EventsSection />
+        <BookClubSection />
+        <PartnersCarousel />
+        <ShopSection />
+        <GymRatsSection />
+        <PricingSection />
+        <FAQSection />
+        <TestimonialsSection />
+        <NewsletterSection />
+      </main>
       <Footer />
     </div>
   );

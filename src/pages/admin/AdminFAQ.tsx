@@ -24,17 +24,36 @@ const AdminFAQ = () => {
 
   const handleSave = async () => {
     if (!form.question || !form.answer) return;
-    if (editingId) {
-      await updateFaq(editingId, form);
-      toast({ title: "FAQ atualizada!" });
-    } else {
-      await addFaq(form);
-      toast({ title: "FAQ adicionada!" });
+    try {
+      if (editingId) {
+        await updateFaq(editingId, form);
+        toast({ title: "FAQ atualizada!" });
+      } else {
+        await addFaq(form);
+        toast({ title: "FAQ adicionada!" });
+      }
+      setOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar FAQ",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
     }
-    setOpen(false);
   };
 
-  const handleDelete = async (id: string) => { await deleteFaq(id); toast({ title: "FAQ removida!" }); };
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteFaq(id);
+      toast({ title: "FAQ removida!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover FAQ",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div>

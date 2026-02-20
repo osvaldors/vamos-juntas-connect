@@ -13,35 +13,108 @@ const AdminMembers = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", role: "", photoUrl: "" });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const filtered = members.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase()) || m.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openNew = () => { setEditingId(null); setForm({ name: "", email: "", phone: "", role: "", photoUrl: "" }); setOpen(true); };
+  const openNew = () => {
+    setEditingId(null);
+    setForm({ name: "", email: "", phone: "", role: "", photoUrl: "" });
+    setPhotoFile(null);
+    setOpen(true);
+  };
 
   const openEdit = (m: typeof members[0]) => {
     setEditingId(m.id);
     setForm({ name: m.name, email: m.email, phone: m.phone, role: m.role, photoUrl: m.photoUrl });
+    setPhotoFile(null);
     setOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!form.name || !form.email) return;
-    if (editingId) {
-      await updateMember(editingId, form);
-      toast({ title: "Membro atualizado!" });
-    } else {
-      await addMember({ ...form, status: "active" });
-      toast({ title: "Membro adicionado!" });
-    }
-    setOpen(false);
+  const fileToDataUrl = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Não foi possível ler o arquivo de imagem."));
+      reader.readAsDataURL(file);
+    });
   };
 
-  const handleDelete = async (id: string) => { await deleteMember(id); toast({ title: "Membro removido!" }); };
+  const handleSave = async () => {
+    if (!form.name || !form.email) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha pelo menos nome e e-mail para salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      let finalPhotoUrl = form.photoUrl;
+
+      if (photoFile) {
+        try {
+          finalPhotoUrl = await fileToDataUrl(photoFile);
+        } catch (err: any) {
+          toast({
+            title: "Erro ao processar foto",
+            description: err?.message || "Tente novamente com outra imagem.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      if (editingId) {
+        await updateMember(editingId, { ...form, photoUrl: finalPhotoUrl });
+        toast({ title: "Membro atualizado!" });
+      } else {
+        await addMember({ ...form, photoUrl: finalPhotoUrl, status: "active" });
+        toast({ title: "Membro adicionado!" });
+      }
+
+      setOpen(false);
+      setPhotoFile(null);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar membro",
+        description: err?.message || "Verifique as permissões no Supabase e tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMember(id);
+      toast({ title: "Membro removido!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover membro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const toggleStatus = async (m: typeof members[0]) => {
-    await updateMember(m.id, { status: m.status === "active" ? "inactive" : "active" });
+    try {
+      await updateMember(m.id, { status: m.status === "active" ? "inactive" : "active" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao alterar status",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -55,14 +128,69 @@ const AdminMembers = () => {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{editingId ? "Editar Membro" : "Novo Membro"}</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>{editingId ? "Editar Membro" : "Novo Membro"}</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4 mt-4">
-              <Input placeholder="Nome completo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              <Input placeholder="E-mail" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <Input placeholder="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <Input placeholder="Profissão / Papel" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
-              <Input placeholder="URL da foto" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} />
-              <Button onClick={handleSave} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">Salvar</Button>
+              <div className="space-y-1">
+                <Input
+                  placeholder="Nome completo"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Campo obrigatório.</p>
+              </div>
+              <div className="space-y-1">
+                <Input
+                  placeholder="E-mail"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Usado apenas para contato interno.</p>
+              </div>
+              <Input
+                placeholder="Telefone"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+              <Input
+                placeholder="Profissão / Papel"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Foto da membro
+                </label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  JPG ou PNG, tamanho recomendado 400x400px. Opcional.
+                </p>
+                {form.photoUrl && !photoFile && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <img
+                      src={form.photoUrl}
+                      alt={form.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-xs text-muted-foreground">Foto atual</span>
+                  </div>
+                )}
+              </div>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full gradient-primary border-0 text-primary-foreground rounded-full"
+              >
+                {isSaving ? "Salvando..." : "Salvar"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -14,7 +14,7 @@ const AboutSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="sobre" className="py-24 bg-cream" ref={ref}>
+    <section id="sobre" className="py-24 bg-background" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -40,7 +40,7 @@ const AboutSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }}
-              className="bg-card rounded-2xl p-8 text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="bg-card rounded-2xl p-8 text-center border border-border/60 hover:border-border transition-all duration-300"
             >
               <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-5">
                 <item.icon className="h-7 w-7 text-primary-foreground" />

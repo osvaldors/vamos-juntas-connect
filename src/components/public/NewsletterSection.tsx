@@ -20,7 +20,7 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section id="contato" className="py-24 bg-cream" ref={ref}>
+    <section id="contato" className="py-24 bg-background" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -36,7 +36,7 @@ const NewsletterSection = () => {
             Inscreva-se na nossa newsletter e fique por dentro de eventos, leituras e novidades do clube.
           </p>
 
-          <form onSubmit={handleSubmit} className="flex gap-3">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
             <Input
               type="email"
               placeholder="Seu melhor e-mail"

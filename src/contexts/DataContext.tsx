@@ -124,6 +124,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       supabase.from("partners").select("*").order("created_at"),
       supabase.from("faqs").select("*").order("created_at"),
     ]);
+
+    if (b.error) console.error("Erro ao carregar banners:", b.error.message);
+    if (m.error) console.error("Erro ao carregar membros:", m.error.message);
+    if (e.error) console.error("Erro ao carregar eventos:", e.error.message);
+    if (bk.error) console.error("Erro ao carregar livros:", bk.error.message);
+    if (p.error) console.error("Erro ao carregar parceiros:", p.error.message);
+    if (f.error) console.error("Erro ao carregar FAQs:", f.error.message);
+
     setBanners((b.data || []).map(mapBanner));
     setMembers((m.data || []).map(mapMember));
     setEvents((e.data || []).map(mapEvent));
@@ -137,7 +145,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // CRUD helpers
   const addBanner = async (b: Omit<Banner, "id">) => {
-    await supabase.from("banners").insert({ title: b.title, subtitle: b.subtitle, image_url: b.imageUrl, cta: b.cta });
+    const { error } = await supabase
+      .from("banners")
+      .insert({ title: b.title, subtitle: b.subtitle, image_url: b.imageUrl, cta: b.cta });
+    if (error) throw error;
     await refetch();
   };
   const updateBanner = async (id: string, b: Partial<Banner>) => {
@@ -146,13 +157,21 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (b.subtitle !== undefined) update.subtitle = b.subtitle;
     if (b.imageUrl !== undefined) update.image_url = b.imageUrl;
     if (b.cta !== undefined) update.cta = b.cta;
-    await supabase.from("banners").update(update).eq("id", id);
+    const { error } = await supabase.from("banners").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deleteBanner = async (id: string) => { await supabase.from("banners").delete().eq("id", id); await refetch(); };
+  const deleteBanner = async (id: string) => {
+    const { error } = await supabase.from("banners").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   const addMember = async (m: Omit<Member, "id">) => {
-    await supabase.from("members").insert({ name: m.name, email: m.email, phone: m.phone, role: m.role, photo_url: m.photoUrl, status: m.status });
+    const { error } = await supabase
+      .from("members")
+      .insert({ name: m.name, email: m.email, phone: m.phone, role: m.role, photo_url: m.photoUrl, status: m.status });
+    if (error) throw error;
     await refetch();
   };
   const updateMember = async (id: string, m: Partial<Member>) => {
@@ -163,13 +182,28 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (m.role !== undefined) update.role = m.role;
     if (m.photoUrl !== undefined) update.photo_url = m.photoUrl;
     if (m.status !== undefined) update.status = m.status;
-    await supabase.from("members").update(update).eq("id", id);
+    const { error } = await supabase.from("members").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deleteMember = async (id: string) => { await supabase.from("members").delete().eq("id", id); await refetch(); };
+  const deleteMember = async (id: string) => {
+    const { error } = await supabase.from("members").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   const addEvent = async (e: Omit<AppEvent, "id">) => {
-    await supabase.from("events").insert({ title: e.title, event_date: e.date, event_time: e.time, location: e.location, category: e.category, description: e.description });
+    const { error } = await supabase
+      .from("events")
+      .insert({
+        title: e.title,
+        event_date: e.date,
+        event_time: e.time,
+        location: e.location,
+        category: e.category,
+        description: e.description,
+      });
+    if (error) throw error;
     await refetch();
   };
   const updateEvent = async (id: string, e: Partial<AppEvent>) => {
@@ -180,13 +214,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (e.location !== undefined) update.location = e.location;
     if (e.category !== undefined) update.category = e.category;
     if (e.description !== undefined) update.description = e.description;
-    await supabase.from("events").update(update).eq("id", id);
+    const { error } = await supabase.from("events").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deleteEvent = async (id: string) => { await supabase.from("events").delete().eq("id", id); await refetch(); };
+  const deleteEvent = async (id: string) => {
+    const { error } = await supabase.from("events").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   const addBook = async (b: Omit<Book, "id">) => {
-    await supabase.from("books").insert({ title: b.title, author: b.author, synopsis: b.synopsis, meeting_date: b.meetingDate, buy_link: b.buyLink, cover_url: b.coverUrl, status: b.status });
+    const { error } = await supabase
+      .from("books")
+      .insert({
+        title: b.title,
+        author: b.author,
+        synopsis: b.synopsis,
+        meeting_date: b.meetingDate,
+        buy_link: b.buyLink,
+        cover_url: b.coverUrl,
+        status: b.status,
+      });
+    if (error) throw error;
     await refetch();
   };
   const updateBook = async (id: string, b: Partial<Book>) => {
@@ -198,13 +248,30 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (b.buyLink !== undefined) update.buy_link = b.buyLink;
     if (b.coverUrl !== undefined) update.cover_url = b.coverUrl;
     if (b.status !== undefined) update.status = b.status;
-    await supabase.from("books").update(update).eq("id", id);
+    const { error } = await supabase.from("books").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deleteBook = async (id: string) => { await supabase.from("books").delete().eq("id", id); await refetch(); };
+  const deleteBook = async (id: string) => {
+    const { error } = await supabase.from("books").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   const addPartner = async (p: Omit<Partner, "id">) => {
-    await supabase.from("partners").insert({ name: p.name, category: p.category, description: p.description, website: p.website, discount_code: p.discountCode, discount_percent: p.discountPercent, logo_url: p.logoUrl, is_active: p.isActive });
+    const { error } = await supabase
+      .from("partners")
+      .insert({
+        name: p.name,
+        category: p.category,
+        description: p.description,
+        website: p.website,
+        discount_code: p.discountCode,
+        discount_percent: p.discountPercent,
+        logo_url: p.logoUrl,
+        is_active: p.isActive,
+      });
+    if (error) throw error;
     await refetch();
   };
   const updatePartner = async (id: string, p: Partial<Partner>) => {
@@ -217,23 +284,34 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (p.discountPercent !== undefined) update.discount_percent = p.discountPercent;
     if (p.logoUrl !== undefined) update.logo_url = p.logoUrl;
     if (p.isActive !== undefined) update.is_active = p.isActive;
-    await supabase.from("partners").update(update).eq("id", id);
+    const { error } = await supabase.from("partners").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deletePartner = async (id: string) => { await supabase.from("partners").delete().eq("id", id); await refetch(); };
+  const deletePartner = async (id: string) => {
+    const { error } = await supabase.from("partners").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   const addFaq = async (f: Omit<FAQ, "id">) => {
-    await supabase.from("faqs").insert({ question: f.question, answer: f.answer });
+    const { error } = await supabase.from("faqs").insert({ question: f.question, answer: f.answer });
+    if (error) throw error;
     await refetch();
   };
   const updateFaq = async (id: string, f: Partial<FAQ>) => {
     const update: any = {};
     if (f.question !== undefined) update.question = f.question;
     if (f.answer !== undefined) update.answer = f.answer;
-    await supabase.from("faqs").update(update).eq("id", id);
+    const { error } = await supabase.from("faqs").update(update).eq("id", id);
+    if (error) throw error;
     await refetch();
   };
-  const deleteFaq = async (id: string) => { await supabase.from("faqs").delete().eq("id", id); await refetch(); };
+  const deleteFaq = async (id: string) => {
+    const { error } = await supabase.from("faqs").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
 
   return (
     <DataContext.Provider value={{

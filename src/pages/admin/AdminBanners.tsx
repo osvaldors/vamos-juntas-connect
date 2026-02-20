@@ -27,19 +27,35 @@ const AdminBanners = () => {
 
   const handleSave = async () => {
     if (!form.title) return;
-    if (editingId) {
-      await updateBanner(editingId, form);
-      toast({ title: "Banner atualizado!" });
-    } else {
-      await addBanner(form);
-      toast({ title: "Banner adicionado!" });
+    try {
+      if (editingId) {
+        await updateBanner(editingId, form);
+        toast({ title: "Banner atualizado!" });
+      } else {
+        await addBanner(form);
+        toast({ title: "Banner adicionado!" });
+      }
+      setOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar banner",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
     }
-    setOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    await deleteBanner(id);
-    toast({ title: "Banner removido!" });
+    try {
+      await deleteBanner(id);
+      toast({ title: "Banner removido!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover banner",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

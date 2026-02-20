@@ -24,20 +24,47 @@ const AdminPartners = () => {
 
   const handleSave = async () => {
     if (!form.name) return;
-    if (editingId) {
-      await updatePartner(editingId, form);
-      toast({ title: "Parceiro atualizado!" });
-    } else {
-      await addPartner({ ...form, isActive: true });
-      toast({ title: "Parceiro adicionado!" });
+    try {
+      if (editingId) {
+        await updatePartner(editingId, form);
+        toast({ title: "Parceiro atualizado!" });
+      } else {
+        await addPartner({ ...form, isActive: true });
+        toast({ title: "Parceiro adicionado!" });
+      }
+      setOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar parceiro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
     }
-    setOpen(false);
   };
 
-  const handleDelete = async (id: string) => { await deletePartner(id); toast({ title: "Parceiro removido!" }); };
+  const handleDelete = async (id: string) => {
+    try {
+      await deletePartner(id);
+      toast({ title: "Parceiro removido!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover parceiro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const toggleActive = async (p: typeof partners[0]) => {
-    await updatePartner(p.id, { isActive: !p.isActive });
+    try {
+      await updatePartner(p.id, { isActive: !p.isActive });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao alterar status do parceiro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

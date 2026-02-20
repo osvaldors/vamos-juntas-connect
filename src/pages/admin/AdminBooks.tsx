@@ -24,17 +24,36 @@ const AdminBooks = () => {
 
   const handleSave = async () => {
     if (!form.title || !form.author) return;
-    if (editingId) {
-      await updateBook(editingId, form);
-      toast({ title: "Livro atualizado!" });
-    } else {
-      await addBook(form);
-      toast({ title: "Livro adicionado!" });
+    try {
+      if (editingId) {
+        await updateBook(editingId, form);
+        toast({ title: "Livro atualizado!" });
+      } else {
+        await addBook(form);
+        toast({ title: "Livro adicionado!" });
+      }
+      setOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Erro ao salvar livro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
     }
-    setOpen(false);
   };
 
-  const handleDelete = async (id: string) => { await deleteBook(id); toast({ title: "Livro removido!" }); };
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBook(id);
+      toast({ title: "Livro removido!" });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover livro",
+        description: err?.message || "Verifique as permissões no Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const statusLabels: Record<string, string> = { current: "Livro do Mês", finished: "Lido", upcoming: "Próximo" };
   const statusColors: Record<string, string> = { current: "bg-primary/10 text-primary", finished: "bg-muted text-muted-foreground", upcoming: "bg-accent/20 text-accent-foreground" };
