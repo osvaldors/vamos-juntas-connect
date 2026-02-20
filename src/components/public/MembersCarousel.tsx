@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useData } from "@/contexts/DataContext";
 
 function getInitials(name: string) {
@@ -20,17 +20,9 @@ const pastelColors = [
 const MembersCarousel = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [offset, setOffset] = useState(0);
   const { members } = useData();
 
   const activeMembers = members.filter((m) => m.status === "active");
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setOffset((prev) => prev + 1);
-    }, 40);
-    return () => clearInterval(timer);
-  }, []);
 
   // Se ainda não há membros cadastrados, mostra apenas o título com uma mensagem suave
   if (activeMembers.length === 0) {
@@ -56,12 +48,8 @@ const MembersCarousel = () => {
     );
   }
 
-  const displayMembers = [...activeMembers, ...activeMembers];
-  const totalWidth = Math.max(activeMembers.length * 200, 1);
-  const translateX = -(offset % totalWidth);
-
   return (
-    <section className="py-20 bg-background overflow-hidden" ref={ref}>
+    <section className="py-20 bg-background" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -75,35 +63,26 @@ const MembersCarousel = () => {
           </h2>
         </motion.div>
       </div>
-
-      <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10" />
-
-        <div
-          className="flex gap-6 will-change-transform"
-          style={{ transform: `translateX(${translateX}px)` }}
-        >
-          {displayMembers.map((member, i) => (
+      <div className="mt-10 flex flex-wrap justify-center gap-6">
+        {activeMembers.map((member, i) => (
+          <div
+            key={member.id}
+            className="w-[170px] text-center group"
+          >
             <div
-              key={`${member.id}-${i}`}
-              className="shrink-0 w-[170px] text-center group"
+              className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-primary-foreground font-heading font-bold text-lg shadow-md group-hover:scale-110 transition-transform duration-300 overflow-hidden"
+              style={{ background: pastelColors[i % pastelColors.length] }}
             >
-              <div
-                className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-primary-foreground font-heading font-bold text-lg shadow-md group-hover:scale-110 transition-transform duration-300 overflow-hidden"
-                style={{ background: pastelColors[i % pastelColors.length] }}
-              >
-                {member.photoUrl ? (
-                  <img src={member.photoUrl} alt={member.name} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  getInitials(member.name)
-                )}
-              </div>
-              <p className="font-heading font-semibold text-sm text-foreground">{member.name}</p>
-              <p className="text-xs text-muted-foreground">{member.role}</p>
+              {member.photoUrl ? (
+                <img src={member.photoUrl} alt={member.name} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                getInitials(member.name)
+              )}
             </div>
-          ))}
-        </div>
+            <p className="font-heading font-semibold text-sm text-foreground">{member.name}</p>
+            <p className="text-xs text-muted-foreground">{member.role}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
