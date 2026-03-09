@@ -1,51 +1,40 @@
-import { Heart, Instagram, Facebook, Mail } from "lucide-react";
+import { Heart, Instagram, ArrowUpRight } from "lucide-react";
+import logo from "@/assets/logo.webp";
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t border-border py-10">
+    <footer className="bg-foreground text-primary-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
-          {/* Brand */}
+        <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Heart className="h-6 w-6 text-primary" />
-              <span className="font-heading font-bold text-lg text-foreground">Vamos Juntas</span>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Um clube de mulheres que acreditam no poder da união, do acolhimento e do crescimento coletivo.
+            <img src={logo} alt="Vamos Juntas" className="h-10 mb-4 brightness-0 invert" />
+            <p className="text-primary-foreground/60 text-sm leading-relaxed max-w-xs">
+              Um clube de mulheres modernas que acreditam no poder da união, do acolhimento e do crescimento coletivo.
             </p>
           </div>
 
-          {/* Links */}
           <div>
-            <h4 className="font-heading font-semibold text-foreground mb-4">Links Rápidos</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#sobre" className="hover:text-primary transition-colors">Sobre Nós</a></li>
-              <li><a href="#eventos" className="hover:text-primary transition-colors">Eventos</a></li>
-              <li><a href="#livro" className="hover:text-primary transition-colors">Clube do Livro</a></li>
-              <li><a href="#contato" className="hover:text-primary transition-colors">Contato</a></li>
+            <h4 className="font-heading font-semibold text-primary-foreground mb-5 text-sm tracking-wide uppercase">Navegação</h4>
+            <ul className="space-y-3 text-sm text-primary-foreground/60">
+              <li><a href="#sobre" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Sobre Nós <ArrowUpRight className="h-3 w-3" /></a></li>
+              <li><a href="#eventos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Eventos <ArrowUpRight className="h-3 w-3" /></a></li>
+              <li><a href="#livro" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Clube do Livro <ArrowUpRight className="h-3 w-3" /></a></li>
+              <li><a href="#planos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Planos <ArrowUpRight className="h-3 w-3" /></a></li>
             </ul>
           </div>
 
-          {/* Social */}
           <div>
-            <h4 className="font-heading font-semibold text-foreground mb-4">Redes Sociais</h4>
+            <h4 className="font-heading font-semibold text-primary-foreground mb-5 text-sm tracking-wide uppercase">Conecte-se</h4>
             <div className="flex gap-3">
-              <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all">
+              <a href="#" className="w-10 h-10 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary hover:text-primary-foreground transition-all">
                 <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all">
-                <Mail className="h-5 w-5" />
               </a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-border pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="border-t border-primary-foreground/10 pt-8 text-center">
+          <p className="text-xs text-primary-foreground/40">
             © 2026 Vamos Juntas Club. Todos os direitos reservados. Feito com <Heart className="h-3 w-3 inline text-primary" /> por mulheres incríveis.
           </p>
         </div>

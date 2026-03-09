@@ -21,43 +21,51 @@ const BookClubSection = () => {
   if (!currentBook) return null;
 
   return (
-    <section id="livro" className="py-24 bg-background" ref={ref}>
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+    <section id="livro" className="py-28 bg-background relative overflow-hidden" ref={ref}>
+      <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl translate-y-1/2 -translate-x-1/2" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
           >
             <div className="relative">
+              <div className="absolute -inset-4 gradient-primary rounded-3xl opacity-10 blur-2xl" />
               <img
                 src={currentBook.coverUrl || bookClubImg}
                 alt="Clube do Livro"
-                className="rounded-2xl shadow-xl w-full aspect-square object-cover"
+                className="rounded-2xl shadow-2xl w-full aspect-[4/5] object-cover relative z-10"
               />
-              <div className="absolute -bottom-4 -right-4 bg-card rounded-xl shadow-lg p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-primary-foreground" />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ delay: 0.5 }}
+                className="absolute -bottom-6 -right-6 bg-card rounded-2xl shadow-xl p-5 flex items-center gap-4 border border-border z-20"
+              >
+                <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-heading font-semibold text-foreground">45+ livros</p>
-                  <p className="text-xs text-muted-foreground">lidos juntas</p>
+                  <p className="text-lg font-heading font-bold text-foreground">45+</p>
+                  <p className="text-xs text-muted-foreground">livros lidos juntas</p>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
           >
-            <p className="font-accent italic text-primary text-lg mb-2">Leitura do mês</p>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+            <span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-4 bg-primary/5 px-4 py-2 rounded-full">Leitura do Mês</span>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6 tracking-tight">
               Clube do <span className="text-gradient">Livro</span>
             </h2>
-            <div className="bg-card rounded-xl p-6 border border-border mb-6">
-              <h3 className="font-heading font-semibold text-lg text-foreground mb-1">
+            <div className="bg-muted rounded-2xl p-6 mb-8">
+              <h3 className="font-heading font-semibold text-xl text-foreground mb-1">
                 "{currentBook.title}"
               </h3>
               <p className="text-primary font-medium text-sm mb-3">{currentBook.author}</p>
@@ -65,20 +73,20 @@ const BookClubSection = () => {
                 {currentBook.synopsis}
               </p>
               {currentBook.meetingDate && (
-                <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 mt-5 text-sm text-muted-foreground bg-background rounded-xl px-4 py-2.5 w-fit">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span>Reunião: {formatMeetingDate(currentBook.meetingDate)}</span>
                 </div>
               )}
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button className="gradient-primary border-0 text-primary-foreground rounded-full px-6">
+              <Button className="gradient-primary border-0 text-primary-foreground rounded-full px-7 shadow-md hover:shadow-lg transition-all hover:scale-105">
                 Participar do Clube <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               {currentBook.buyLink && (
                 <Button
                   variant="outline"
-                  className="rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6"
+                  className="rounded-full border-border text-foreground hover:bg-secondary px-7 transition-all"
                   asChild
                 >
                   <a href={currentBook.buyLink} target="_blank" rel="noopener noreferrer">

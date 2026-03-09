@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
-      <main className="mt-16 flex-1">
+      <main className="flex-1">
         <HeroSection />
         <AboutSection />
         <MembersCarousel />
