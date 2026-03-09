@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Send, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -20,19 +20,20 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section id="contato" className="py-24 bg-muted" ref={ref}>
-      <div className="container mx-auto px-4">
+    <section id="contato" className="py-28 relative overflow-hidden" ref={ref}>
+      <div className="absolute inset-0 gradient-hero opacity-90" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="max-w-xl mx-auto text-center"
         >
-          <p className="font-accent italic text-primary text-lg mb-2">Fique conectada</p>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            Receba nossas <span className="text-gradient">novidades</span>
+          <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
+            Fique conectada
           </h2>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-primary-foreground/80 mb-10 text-lg">
             Inscreva-se na nossa newsletter e fique por dentro de eventos, leituras e novidades do clube.
           </p>
 
@@ -43,11 +44,10 @@ const NewsletterSection = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="rounded-full bg-card border-border flex-1"
+              className="rounded-full bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 flex-1 h-12 px-5 backdrop-blur-sm focus-visible:ring-primary-foreground/50"
             />
-            <Button type="submit" className="gradient-primary border-0 text-primary-foreground rounded-full px-6 shrink-0">
-              <Send className="h-4 w-4 mr-2" />
-              Inscrever
+            <Button type="submit" size="lg" className="rounded-full px-8 bg-primary-foreground text-foreground hover:bg-primary-foreground/90 shadow-lg shrink-0 h-12 font-semibold">
+              Inscrever <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </form>
         </motion.div>
