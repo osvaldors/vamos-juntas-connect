@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, Store, Image, Menu, X, LogOut, CalendarDays, BookOpen, HelpCircle, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.webp";
 
 const sidebarLinks = [
@@ -17,11 +18,17 @@ const sidebarLinks = [
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/admin/login");
+    try {
+      await signOut();
+      toast({ title: "Sessão encerrada com sucesso!" });
+    } catch (e) {
+      console.warn("Logout error:", e);
+    }
+    navigate("/admin/login", { replace: true });
   };
 
   return (

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useData } from "@/contexts/DataContext";
 
@@ -13,6 +14,7 @@ const AdminPartners = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "" });
+  const [isSaving, setIsSaving] = useState(false);
 
   const openNew = () => { setEditingId(null); setForm({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "" }); setOpen(true); };
 
@@ -23,8 +25,12 @@ const AdminPartners = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name) return;
+    if (!form.name) {
+      toast({ title: "Nome obrigatório", variant: "destructive" });
+      return;
+    }
     try {
+      setIsSaving(true);
       if (editingId) {
         await updatePartner(editingId, form);
         toast({ title: "Parceiro atualizado!" });
@@ -34,11 +40,9 @@ const AdminPartners = () => {
       }
       setOpen(false);
     } catch (err: any) {
-      toast({
-        title: "Erro ao salvar parceiro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao salvar parceiro", description: err?.message, variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -47,23 +51,16 @@ const AdminPartners = () => {
       await deletePartner(id);
       toast({ title: "Parceiro removido!" });
     } catch (err: any) {
-      toast({
-        title: "Erro ao remover parceiro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao remover parceiro", description: err?.message, variant: "destructive" });
     }
   };
 
   const toggleActive = async (p: typeof partners[0]) => {
     try {
       await updatePartner(p.id, { isActive: !p.isActive });
+      toast({ title: `Parceiro ${p.isActive ? "desativado" : "ativado"}!` });
     } catch (err: any) {
-      toast({
-        title: "Erro ao alterar status do parceiro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao alterar status", description: err?.message, variant: "destructive" });
     }
   };
 
@@ -78,7 +75,7 @@ const AdminPartners = () => {
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingId ? "Editar Parceiro" : "Novo Parceiro"}</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
-              <Input placeholder="Nome da loja" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input placeholder="Nome da loja *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <Input placeholder="Categoria" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
               <Textarea placeholder="Descrição" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <Input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
@@ -87,12 +84,20 @@ const AdminPartners = () => {
                 <Input placeholder="% desconto" value={form.discountPercent} onChange={(e) => setForm({ ...form, discountPercent: e.target.value })} />
               </div>
               <Input placeholder="URL do logo" value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })} />
-              <Button onClick={handleSave} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">Salvar</Button>
+              <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
+                {isSaving ? "Salvando..." : "Salvar"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {partners.length === 0 && (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            <Store className="h-10 w-10 mx-auto mb-3 opacity-40" />
+            <p>Nenhum parceiro cadastrado ainda.</p>
+          </div>
+        )}
         {partners.map((partner) => (
           <div key={partner.id} className={`bg-card border rounded-xl p-5 transition-all ${partner.isActive ? "border-border" : "border-border opacity-60"}`}>
             <div className="flex items-start justify-between mb-3">
@@ -101,14 +106,28 @@ const AdminPartners = () => {
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(partner)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(partner.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remover parceiro?</AlertDialogTitle>
+                      <AlertDialogDescription>Tem certeza que deseja remover "{partner.name}"?</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(partner.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remover</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
             <h3 className="font-heading font-semibold text-foreground mb-1">{partner.name}</h3>
-            <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{partner.category}</span>
-            <p className="text-sm text-muted-foreground mt-2 mb-3">{partner.description}</p>
+            {partner.category && <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{partner.category}</span>}
+            {partner.description && <p className="text-sm text-muted-foreground mt-2 mb-3">{partner.description}</p>}
             {partner.discountCode && (
-              <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2 text-sm mt-2">
                 <Tag className="h-3.5 w-3.5 text-primary" />
                 <span className="font-mono font-semibold text-primary">{partner.discountCode}</span>
                 <span className="text-muted-foreground">— {partner.discountPercent}</span>

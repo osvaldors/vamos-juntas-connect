@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useData, Book } from "@/contexts/DataContext";
 
@@ -13,6 +14,7 @@ const AdminBooks = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", author: "", synopsis: "", meetingDate: "", buyLink: "", coverUrl: "", status: "current" as Book["status"] });
+  const [isSaving, setIsSaving] = useState(false);
 
   const openNew = () => { setEditingId(null); setForm({ title: "", author: "", synopsis: "", meetingDate: "", buyLink: "", coverUrl: "", status: "current" }); setOpen(true); };
 
@@ -23,8 +25,12 @@ const AdminBooks = () => {
   };
 
   const handleSave = async () => {
-    if (!form.title || !form.author) return;
+    if (!form.title || !form.author) {
+      toast({ title: "Preencha título e autor", variant: "destructive" });
+      return;
+    }
     try {
+      setIsSaving(true);
       if (editingId) {
         await updateBook(editingId, form);
         toast({ title: "Livro atualizado!" });
@@ -34,11 +40,9 @@ const AdminBooks = () => {
       }
       setOpen(false);
     } catch (err: any) {
-      toast({
-        title: "Erro ao salvar livro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao salvar livro", description: err?.message, variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -47,11 +51,7 @@ const AdminBooks = () => {
       await deleteBook(id);
       toast({ title: "Livro removido!" });
     } catch (err: any) {
-      toast({
-        title: "Erro ao remover livro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao remover livro", description: err?.message, variant: "destructive" });
     }
   };
 
@@ -69,8 +69,8 @@ const AdminBooks = () => {
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingId ? "Editar Livro" : "Novo Livro"}</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
-              <Input placeholder="Título do livro" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              <Input placeholder="Autor(a)" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
+              <Input placeholder="Título do livro *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              <Input placeholder="Autor(a) *" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
               <Textarea placeholder="Sinopse" value={form.synopsis} onChange={(e) => setForm({ ...form, synopsis: e.target.value })} rows={3} />
               <Input type="date" value={form.meetingDate} onChange={(e) => setForm({ ...form, meetingDate: e.target.value })} />
               <Input placeholder="Link para compra" value={form.buyLink} onChange={(e) => setForm({ ...form, buyLink: e.target.value })} />
@@ -80,16 +80,26 @@ const AdminBooks = () => {
                 <option value="upcoming">Próximo</option>
                 <option value="finished">Lido</option>
               </select>
-              <Button onClick={handleSave} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">Salvar</Button>
+              <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
+                {isSaving ? "Salvando..." : "Salvar"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
       <div className="space-y-3">
+        {books.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-40" />
+            <p>Nenhum livro cadastrado ainda.</p>
+          </div>
+        )}
         {books.map((book) => (
           <div key={book.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 flex-1">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0"><BookOpen className="h-5 w-5 text-primary" /></div>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                {book.coverUrl ? <img src={book.coverUrl} alt={book.title} className="w-10 h-10 rounded-lg object-cover" /> : <BookOpen className="h-5 w-5 text-primary" />}
+              </div>
               <div>
                 <p className="font-heading font-semibold text-foreground">{book.title}</p>
                 <p className="text-sm text-muted-foreground">{book.author}</p>
@@ -98,7 +108,21 @@ const AdminBooks = () => {
             <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${statusColors[book.status] || ""}`}>{statusLabels[book.status] || book.status}</span>
             <div className="flex gap-1 shrink-0">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(book)}><Edit2 className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(book.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remover livro?</AlertDialogTitle>
+                    <AlertDialogDescription>Tem certeza que deseja remover "{book.title}"?</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(book.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remover</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         ))}
