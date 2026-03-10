@@ -68,7 +68,7 @@ const HeroSection = () => {
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-[1.1] whitespace-pre-line tracking-tight">
               {banner.title}
             </h1>
-            <p className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-lg leading-relaxed">
+            <p className="text-primary-foreground/80 text-base md:text-lg mb-6 max-w-md leading-relaxed">
               {banner.subtitle}
             </p>
             {banner.cta && (

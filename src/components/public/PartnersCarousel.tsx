@@ -13,7 +13,7 @@ const PartnersCarousel = () => {
   if (activePartners.length === 0) return null;
 
   return (
-    <section className="py-24 bg-background" ref={ref}>
+    <section className="py-24 bg-muted" ref={ref}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
