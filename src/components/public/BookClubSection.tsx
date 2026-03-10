@@ -21,7 +21,7 @@ const BookClubSection = () => {
   if (!currentBook) return null;
 
   return (
-    <section id="livro" className="py-28 bg-background relative overflow-hidden" ref={ref}>
+    <section id="livro" className="py-28 bg-card relative overflow-hidden" ref={ref}>
       <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl translate-y-1/2 -translate-x-1/2" />
       
       <div className="container mx-auto px-4 relative z-10">

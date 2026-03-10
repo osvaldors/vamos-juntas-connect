@@ -26,7 +26,7 @@ const HeroSection = () => {
   const banner = activeBanners[current];
 
   return (
-    <section id="inicio" className="relative min-h-[85vh] flex items-center overflow-hidden">
+    <section id="inicio" className="relative h-[65vh] min-h-[420px] max-h-[600px] flex items-center overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id}
@@ -53,7 +53,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="max-w-2xl py-10 md:py-16"
+            className="max-w-xl py-6 md:py-10"
           >
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -65,10 +65,10 @@ const HeroSection = () => {
               <span className="text-primary-foreground/90 text-xs font-medium tracking-wide uppercase">Clube Feminino • Desde 2020</span>
             </motion.div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold text-primary-foreground mb-6 leading-[1.1] whitespace-pre-line tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-[1.1] whitespace-pre-line tracking-tight">
               {banner.title}
             </h1>
-            <p className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-lg leading-relaxed">
+            <p className="text-primary-foreground/80 text-base md:text-lg mb-6 max-w-md leading-relaxed">
               {banner.subtitle}
             </p>
             {banner.cta && (
