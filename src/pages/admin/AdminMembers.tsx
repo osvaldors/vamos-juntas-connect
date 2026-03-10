@@ -3,8 +3,10 @@ import { Plus, Trash2, Edit2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useData } from "@/contexts/DataContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminMembers = () => {
   const { toast } = useToast();
@@ -34,39 +36,30 @@ const AdminMembers = () => {
     setOpen(true);
   };
 
-  const fileToDataUrl = (file: File) => {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Não foi possível ler o arquivo de imagem."));
-      reader.readAsDataURL(file);
-    });
+  const uploadPhoto = async (file: File): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const { error } = await supabase.storage.from("members").upload(fileName, file);
+    if (error) throw error;
+    const { data } = supabase.storage.from("members").getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
   const handleSave = async () => {
-    if (!form.name || !form.email) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha pelo menos nome e e-mail para salvar.",
-        variant: "destructive",
-      });
+    if (!form.name) {
+      toast({ title: "Campo obrigatório", description: "Preencha pelo menos o nome.", variant: "destructive" });
       return;
     }
 
     try {
       setIsSaving(true);
-
       let finalPhotoUrl = form.photoUrl;
 
       if (photoFile) {
         try {
-          finalPhotoUrl = await fileToDataUrl(photoFile);
+          finalPhotoUrl = await uploadPhoto(photoFile);
         } catch (err: any) {
-          toast({
-            title: "Erro ao processar foto",
-            description: err?.message || "Tente novamente com outra imagem.",
-            variant: "destructive",
-          });
+          toast({ title: "Erro ao enviar foto", description: err?.message || "Tente novamente.", variant: "destructive" });
           return;
         }
       }
@@ -82,11 +75,7 @@ const AdminMembers = () => {
       setOpen(false);
       setPhotoFile(null);
     } catch (err: any) {
-      toast({
-        title: "Erro ao salvar membro",
-        description: err?.message || "Verifique as permissões no Supabase e tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao salvar membro", description: err?.message || "Verifique as permissões.", variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -97,23 +86,16 @@ const AdminMembers = () => {
       await deleteMember(id);
       toast({ title: "Membro removido!" });
     } catch (err: any) {
-      toast({
-        title: "Erro ao remover membro",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao remover membro", description: err?.message, variant: "destructive" });
     }
   };
 
   const toggleStatus = async (m: typeof members[0]) => {
     try {
       await updateMember(m.id, { status: m.status === "active" ? "inactive" : "active" });
+      toast({ title: `Membro ${m.status === "active" ? "desativado" : "ativado"}!` });
     } catch (err: any) {
-      toast({
-        title: "Erro ao alterar status",
-        description: err?.message || "Verifique as permissões no Supabase.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao alterar status", description: err?.message, variant: "destructive" });
     }
   };
 
@@ -132,63 +114,21 @@ const AdminMembers = () => {
               <DialogTitle>{editingId ? "Editar Membro" : "Novo Membro"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
-              <div className="space-y-1">
-                <Input
-                  placeholder="Nome completo"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">Campo obrigatório.</p>
-              </div>
-              <div className="space-y-1">
-                <Input
-                  placeholder="E-mail"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">Usado apenas para contato interno.</p>
-              </div>
-              <Input
-                placeholder="Telefone"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-              <Input
-                placeholder="Profissão / Papel"
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-              />
+              <Input placeholder="Nome completo *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input placeholder="E-mail" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <Input placeholder="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <Input placeholder="Profissão / Papel" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Foto da membro
-                </label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  JPG ou PNG, tamanho recomendado 400x400px. Opcional.
-                </p>
+                <label className="text-sm font-medium text-foreground">Foto</label>
+                <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
                 {form.photoUrl && !photoFile && (
                   <div className="flex items-center gap-2 mt-1">
-                    <img
-                      src={form.photoUrl}
-                      alt={form.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
+                    <img src={form.photoUrl} alt={form.name} className="w-8 h-8 rounded-full object-cover" />
                     <span className="text-xs text-muted-foreground">Foto atual</span>
                   </div>
                 )}
               </div>
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="w-full gradient-primary border-0 text-primary-foreground rounded-full"
-              >
+              <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
                 {isSaving ? "Salvando..." : "Salvar"}
               </Button>
             </div>
@@ -236,7 +176,21 @@ const AdminMembers = () => {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(m)}><Edit2 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Remover membro?</AlertDialogTitle>
+                          <AlertDialogDescription>Tem certeza que deseja remover "{m.name}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(m.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remover</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </td>
                 </tr>
               ))}
