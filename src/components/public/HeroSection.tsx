@@ -65,7 +65,7 @@ const HeroSection = () => {
               <span className="text-primary-foreground/90 text-xs font-medium tracking-wide uppercase">Clube Feminino • Desde 2020</span>
             </motion.div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold text-primary-foreground mb-6 leading-[1.1] whitespace-pre-line tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-[1.1] whitespace-pre-line tracking-tight">
               {banner.title}
             </h1>
             <p className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-lg leading-relaxed">
