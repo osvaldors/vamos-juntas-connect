@@ -18,11 +18,17 @@ const sidebarLinks = [
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/admin/login");
+    try {
+      await signOut();
+      toast({ title: "Sessão encerrada com sucesso!" });
+    } catch (e) {
+      console.warn("Logout error:", e);
+    }
+    navigate("/admin/login", { replace: true });
   };
 
   return (
