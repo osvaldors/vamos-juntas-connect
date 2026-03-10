@@ -2,6 +2,9 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, Store, Image, Menu, X, LogOut, CalendarDays, BookOpen, HelpCircle, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo.webp";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.webp";
 
 const sidebarLinks = [
