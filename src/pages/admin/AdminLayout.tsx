@@ -4,8 +4,6 @@ import { LayoutDashboard, Users, Store, Image, Menu, X, LogOut, CalendarDays, Bo
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.webp";
-import { useAuth } from "@/contexts/AuthContext";
-import logo from "@/assets/logo.webp";
 
 const sidebarLinks = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
