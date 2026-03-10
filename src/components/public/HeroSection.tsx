@@ -26,7 +26,7 @@ const HeroSection = () => {
   const banner = activeBanners[current];
 
   return (
-    <section id="inicio" className="relative min-h-[85vh] flex items-center overflow-hidden">
+    <section id="inicio" className="relative h-[65vh] min-h-[420px] max-h-[600px] flex items-center overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id}
