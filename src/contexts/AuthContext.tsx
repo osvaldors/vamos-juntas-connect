@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -26,62 +26,110 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    setIsAdmin(!!data);
-  };
+  const checkAdmin = useCallback(async (userId: string) => {
+    try {
+      const query = supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      // 5-second timeout using Promise.race
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
+      const result = await Promise.race([query, timeout]);
+
+      // If timeout won, result is null (not a Supabase response)
+      if (result && typeof result === 'object' && 'data' in result) {
+        setIsAdmin(!!result.data);
+      } else {
+        console.warn("[AuthContext] checkAdmin timed out");
+        setIsAdmin(false);
+      }
+    } catch (err) {
+      console.warn("[AuthContext] Erro ao verificar admin:", err);
+      setIsAdmin(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Safety timeout: if auth takes too long, unblock the UI
-    const safetyTimer = setTimeout(() => {
-      setLoading(false);
-    }, 10000);
+    let mounted = true;
+    let resolved = false;
 
+    const finishLoading = () => {
+      if (mounted && !resolved) {
+        resolved = true;
+        setLoading(false);
+      }
+    };
+
+    // Safety timeout — NEVER let auth block the UI for more than 5 seconds
+    const safetyTimer = setTimeout(() => {
+      if (!resolved) {
+        console.warn("[AuthContext] Auth initialization timed out — unblocking UI");
+        finishLoading();
+      }
+    }, 5000);
+
+    // 1. Set up the auth state listener FIRST (Supabase best practice)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!mounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
+
         if (session?.user) {
-          try {
-            await checkAdmin(session.user.id);
-          } catch (err) {
-            console.warn("Erro ao verificar admin (auth change):", err);
-            setIsAdmin(false);
-          }
+          // Use setTimeout to avoid Supabase deadlock with concurrent requests during init
+          setTimeout(async () => {
+            if (mounted) {
+              await checkAdmin(session.user.id);
+              finishLoading();
+            }
+          }, 0);
         } else {
           setIsAdmin(false);
+          finishLoading();
         }
-        setLoading(false);
       }
     );
 
+    // 2. Then get the initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
+
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        try {
-          await checkAdmin(session.user.id);
-        } catch (err) {
-          console.warn("Erro ao verificar admin (get session):", err);
-          setIsAdmin(false);
-        }
+        await checkAdmin(session.user.id);
       }
-      setLoading(false);
+      finishLoading();
     }).catch((err) => {
-      console.warn("Erro ao obter sessão:", err);
-      setLoading(false);
+      console.warn("[AuthContext] Erro ao obter sessão:", err);
+      if (mounted) {
+        // Clear potentially corrupted auth data from localStorage
+        try {
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+              console.warn("[AuthContext] Clearing stale auth token:", key);
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (e) {
+          // ignore localStorage errors
+        }
+        finishLoading();
+      }
     });
 
     return () => {
+      mounted = false;
       clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkAdmin]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

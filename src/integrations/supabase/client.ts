@@ -13,5 +13,16 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'vamos-juntas-connect',
+    },
+  },
+  // Lower timeout for non-responsive connections
+  db: {
+    schema: 'public',
+  },
 });

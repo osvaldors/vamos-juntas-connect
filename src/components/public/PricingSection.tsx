@@ -24,6 +24,9 @@ const PricingSection = () => {
 
   const price = isAnnual ? "R$ 279,90" : "R$ 29,90";
   const period = isAnnual ? "/ano" : "/mês";
+  const paymentLink = isAnnual
+    ? "https://invoice.infinitepay.io/plans/sabrinaviiana/3bkFbW19XT"
+    : "https://invoice.infinitepay.io/plans/sabrinaviiana/3bkHRgwPzF";
 
   return (
     <section id="planos" className="py-28 bg-background relative overflow-hidden" ref={ref}>
@@ -132,8 +135,11 @@ const PricingSection = () => {
           <Button
             size="lg"
             className="w-full rounded-full gradient-primary border-0 text-primary-foreground shadow-lg text-base hover:shadow-xl hover:scale-[1.02] transition-all"
+            asChild
           >
-            Assinar Agora <ArrowRight className="ml-2 h-5 w-5" />
+            <a href={paymentLink} target="_blank" rel="noopener noreferrer">
+              Assinar Agora <ArrowRight className="ml-2 h-5 w-5" />
+            </a>
           </Button>
         </motion.div>
       </div>
