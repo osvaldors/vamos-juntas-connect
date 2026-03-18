@@ -1,10 +1,10 @@
-import { Users, Image, Store, CalendarDays, BookOpen, HelpCircle, TrendingUp } from "lucide-react";
+import { Users, Image, Store, CalendarDays, BookOpen, HelpCircle, TrendingUp, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useData } from "@/contexts/DataContext";
 import { motion } from "framer-motion";
 
 const AdminDashboard = () => {
-  const { banners, members, events, books, partners, faqs } = useData();
+  const { banners, members, events, books, partners, faqs, testimonials } = useData();
 
   const cards = [
     { label: "Banners", icon: Image, count: banners.length, href: "/admin/banners", gradient: "from-primary to-accent" },
@@ -13,6 +13,7 @@ const AdminDashboard = () => {
     { label: "Livros", icon: BookOpen, count: books.length, href: "/admin/livros", gradient: "from-primary to-accent" },
     { label: "Parceiros", icon: Store, count: partners.length, href: "/admin/parceiros", gradient: "from-rosa-light to-primary" },
     { label: "FAQ", icon: HelpCircle, count: faqs.length, href: "/admin/faq", gradient: "from-accent to-primary" },
+    { label: "Depoimentos", icon: Quote, count: testimonials.length, href: "/admin/depoimentos", gradient: "from-primary to-accent" },
   ];
 
   return (

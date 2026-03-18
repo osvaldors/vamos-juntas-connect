@@ -1,32 +1,23 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
-
-const testimonials = [
-  {
-    name: "Ana Beatriz",
-    role: "Membro desde 2021",
-    text: "O Vamos Juntas mudou minha vida. Encontrei amizades verdadeiras e um espaço onde posso ser autêntica. Cada encontro é uma fonte de energia e inspiração.",
-  },
-  {
-    name: "Carla Mendes",
-    role: "Membro desde 2022",
-    text: "O clube do livro me reconectou com a leitura e as discussões são incríveis. Amo fazer parte desse grupo de mulheres tão especiais e acolhedoras.",
-  },
-  {
-    name: "Juliana Santos",
-    role: "Membro desde 2020",
-    text: "Entrei tímida e encontrei minha voz. As mulheres daqui te apoiam de verdade. É muito mais que um clube, é uma família que a gente escolhe ter.",
-  },
-];
+import { useData } from "@/contexts/DataContext";
 
 const TestimonialsSection = () => {
+  const { testimonials, loading } = useData();
   const [current, setCurrent] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const next = () => setCurrent((c) => (c + 1) % testimonials.length);
-  const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
+  const activeTestimonials = testimonials.filter((t) => t.isActive);
+
+  const next = () => setCurrent((c) => (c + 1) % activeTestimonials.length);
+  const prev = () => setCurrent((c) => (c - 1 + activeTestimonials.length) % activeTestimonials.length);
+
+  if (!loading && activeTestimonials.length === 0) return null;
+  if (loading && activeTestimonials.length === 0) return null; // or a skeleton
+
+  const currentTestimonial = activeTestimonials[current];
 
   return (
     <section className="py-28 bg-background relative overflow-hidden" ref={ref}>
@@ -56,15 +47,15 @@ const TestimonialsSection = () => {
               <Quote className="h-6 w-6 text-primary-foreground" />
             </div>
             <p className="text-foreground text-xl md:text-2xl leading-relaxed mb-10 font-accent italic">
-              "{testimonials[current].text}"
+              "{currentTestimonial.text}"
             </p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full gradient-warm flex items-center justify-center text-primary-foreground font-heading font-bold text-sm">
-                {testimonials[current].name.split(" ").map(n => n[0]).join("")}
+                {currentTestimonial.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div>
-                <p className="font-heading font-semibold text-foreground">{testimonials[current].name}</p>
-                <p className="text-sm text-muted-foreground">{testimonials[current].role}</p>
+                <p className="font-heading font-semibold text-foreground">{currentTestimonial.name}</p>
+                <p className="text-sm text-muted-foreground">{currentTestimonial.role}</p>
               </div>
             </div>
           </div>
@@ -77,7 +68,7 @@ const TestimonialsSection = () => {
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">
-              {testimonials.map((_, i) => (
+              {activeTestimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}

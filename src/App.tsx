@@ -17,6 +17,7 @@ import AdminPartners from "./pages/admin/AdminPartners";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminBooks from "./pages/admin/AdminBooks";
 import AdminFAQ from "./pages/admin/AdminFAQ";
+import AdminTestimonials from "./pages/admin/AdminTestimonials";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="livros" element={<AdminBooks />} />
                 <Route path="parceiros" element={<AdminPartners />} />
                 <Route path="faq" element={<AdminFAQ />} />
+                <Route path="depoimentos" element={<AdminTestimonials />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

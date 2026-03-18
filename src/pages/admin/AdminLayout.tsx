@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Store, Image, Menu, X, LogOut, CalendarDays, BookOpen, HelpCircle, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Users, Store, Image, Menu, X, LogOut, CalendarDays, BookOpen, HelpCircle, ExternalLink, Quote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.webp";
@@ -13,6 +13,7 @@ const sidebarLinks = [
   { label: "Clube do Livro", href: "/admin/livros", icon: BookOpen },
   { label: "Lojas Parceiras", href: "/admin/parceiros", icon: Store },
   { label: "FAQ", href: "/admin/faq", icon: HelpCircle },
+  { label: "Depoimentos", href: "/admin/depoimentos", icon: Quote },
 ];
 
 const AdminLayout = () => {

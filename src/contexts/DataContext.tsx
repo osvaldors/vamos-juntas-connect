@@ -61,6 +61,14 @@ export interface FAQ {
   answer: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  text: string;
+  isActive: boolean;
+}
+
 interface DataContextType {
   banners: Banner[];
   members: Member[];
@@ -68,6 +76,7 @@ interface DataContextType {
   books: Book[];
   partners: Partner[];
   faqs: FAQ[];
+  testimonials: Testimonial[];
   loading: boolean;
   error: string | null;
   initialLoadDone: boolean;
@@ -91,6 +100,9 @@ interface DataContextType {
   addFaq: (f: Omit<FAQ, "id">) => Promise<void>;
   updateFaq: (id: string, f: Partial<FAQ>) => Promise<void>;
   deleteFaq: (id: string) => Promise<void>;
+  addTestimonial: (t: Omit<Testimonial, "id">) => Promise<void>;
+  updateTestimonial: (id: string, t: Partial<Testimonial>) => Promise<void>;
+  deleteTestimonial: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -108,6 +120,7 @@ const mapEvent = (r: any): AppEvent => ({ id: r.id, title: r.title, date: r.even
 const mapBook = (r: any): Book => ({ id: r.id, title: r.title, author: r.author || "", synopsis: r.synopsis || "", meetingDate: r.meeting_date || "", buyLink: r.buy_link || "", coverUrl: r.cover_url || "", status: (r.status as Book["status"]) || "upcoming" });
 const mapPartner = (r: any): Partner => ({ id: r.id, name: r.name, category: r.category || "", description: r.description || "", website: r.website || "", discountCode: r.discount_code || "", discountPercent: r.discount_percent || "", logoUrl: r.logo_url || "", isActive: r.is_active ?? true });
 const mapFaq = (r: any): FAQ => ({ id: r.id, question: r.question, answer: r.answer });
+const mapTestimonial = (r: any): Testimonial => ({ id: r.id, name: r.name, role: r.role || "", text: r.text || "", isActive: r.is_active ?? true });
 
 type TableName = keyof Database["public"]["Tables"];
 
@@ -162,6 +175,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -176,13 +190,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       // Fetch all tables in parallel, but each with its own retry/timeout
-      const [b, m, e, bk, p, f] = await Promise.all([
+      const [b, m, e, bk, p, f, t] = await Promise.all([
         fetchTable("banners", "created_at", mapBanner),
         fetchTable("members", "created_at", mapMember),
         fetchTable("events", "event_date", mapEvent),
         fetchTable("books", "created_at", mapBook),
         fetchTable("partners", "created_at", mapPartner),
         fetchTable("faqs", "created_at", mapFaq),
+        fetchTable("testimonials", "created_at", mapTestimonial),
       ]);
 
       // Update state with whatever data we got (partial success is better than nothing)
@@ -192,9 +207,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setBooks(bk.data);
       setPartners(p.data);
       setFaqs(f.data);
+      setTestimonials(t.data);
 
       // Collect errors
-      const errors = [b, m, e, bk, p, f]
+      const errors = [b, m, e, bk, p, f, t]
         .filter((r) => r.error)
         .map((r) => r.error);
       if (errors.length > 0) {
@@ -383,15 +399,37 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     await refetch();
   };
 
+  const addTestimonial = async (t: Omit<Testimonial, "id">) => {
+    const { error } = await supabase.from("testimonials").insert({ name: t.name, role: t.role, text: t.text, is_active: t.isActive });
+    if (error) throw error;
+    await refetch();
+  };
+  const updateTestimonial = async (id: string, t: Partial<Testimonial>) => {
+    const update: any = {};
+    if (t.name !== undefined) update.name = t.name;
+    if (t.role !== undefined) update.role = t.role;
+    if (t.text !== undefined) update.text = t.text;
+    if (t.isActive !== undefined) update.is_active = t.isActive;
+    const { error } = await supabase.from("testimonials").update(update).eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
+  const deleteTestimonial = async (id: string) => {
+    const { error } = await supabase.from("testimonials").delete().eq("id", id);
+    if (error) throw error;
+    await refetch();
+  };
+
   return (
     <DataContext.Provider value={{
-      banners, members, events, books, partners, faqs, loading, error, initialLoadDone, refetch,
+      banners, members, events, books, partners, faqs, testimonials, loading, error, initialLoadDone, refetch,
       addBanner, updateBanner, deleteBanner,
       addMember, updateMember, deleteMember,
       addEvent, updateEvent, deleteEvent,
       addBook, updateBook, deleteBook,
       addPartner, updatePartner, deletePartner,
       addFaq, updateFaq, deleteFaq,
+      addTestimonial, updateTestimonial, deleteTestimonial,
     }}>
       {children}
     </DataContext.Provider>
