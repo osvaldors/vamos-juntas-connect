@@ -81,8 +81,13 @@ const BookClubSection = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button className="gradient-primary border-0 text-primary-foreground rounded-full px-7 shadow-md hover:shadow-lg transition-all hover:scale-105">
-                Participar do Clube <ArrowRight className="ml-2 h-4 w-4" />
+              <Button 
+                className="gradient-primary border-0 text-primary-foreground rounded-full px-7 shadow-md hover:shadow-lg transition-all hover:scale-105"
+                asChild
+              >
+                <a href="https://invoice.infinitepay.io/plans/sabrinaviiana/1nsJkEdtfv" target="_blank" rel="noopener noreferrer">
+                  Participar do Clube do Livro <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
               </Button>
               {currentBook.buyLink && (
                 <Button
