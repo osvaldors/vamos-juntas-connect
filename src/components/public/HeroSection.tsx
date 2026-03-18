@@ -35,7 +35,7 @@ const HeroSection = () => {
   const banner = activeBanners[current];
 
   return (
-    <section id="inicio" className="relative h-[65vh] min-h-[420px] max-h-[600px] flex items-center overflow-hidden">
+    <section id="inicio" className="relative h-[40vh] min-h-[420px] max-h-[420px] flex items-center overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id}
@@ -73,7 +73,7 @@ const HeroSection = () => {
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse-soft" />
               <span className="text-primary-foreground/90 text-xs font-medium tracking-wide uppercase">Clube Feminino • Desde 2020</span>
             </motion.div>
-            
+
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-[1.1] whitespace-pre-line tracking-tight">
               {banner.title}
             </h1>
