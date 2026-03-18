@@ -8,20 +8,54 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { useData } from "@/contexts/DataContext";
 
+import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
 const AdminPartners = () => {
   const { toast } = useToast();
   const { partners, addPartner, updatePartner, deletePartner } = useData();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "" });
+  const [form, setForm] = useState({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "", isActive: true });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const openNew = () => { setEditingId(null); setForm({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "" }); setOpen(true); };
+  const openNew = () => { setEditingId(null); setForm({ name: "", category: "", description: "", website: "", discountCode: "", discountPercent: "", logoUrl: "", isActive: true }); setOpen(true); };
 
   const openEdit = (p: typeof partners[0]) => {
     setEditingId(p.id);
-    setForm({ name: p.name, category: p.category, description: p.description, website: p.website, discountCode: p.discountCode, discountPercent: p.discountPercent, logoUrl: p.logoUrl });
+    setForm({ name: p.name, category: p.category, description: p.description, website: p.website, discountCode: p.discountCode, discountPercent: p.discountPercent, logoUrl: p.logoUrl, isActive: p.isActive });
     setOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `partners/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('club-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('club-photos')
+        .getPublicUrl(filePath);
+
+      setForm({ ...form, logoUrl: publicUrl });
+      toast({ title: "Logo carregado com sucesso!" });
+    } catch (error: any) {
+      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -35,7 +69,7 @@ const AdminPartners = () => {
         await updatePartner(editingId, form);
         toast({ title: "Parceiro atualizado!" });
       } else {
-        await addPartner({ ...form, isActive: true });
+        await addPartner(form);
         toast({ title: "Parceiro adicionado!" });
       }
       setOpen(false);
@@ -83,8 +117,25 @@ const AdminPartners = () => {
                 <Input placeholder="Código de desconto" value={form.discountCode} onChange={(e) => setForm({ ...form, discountCode: e.target.value })} />
                 <Input placeholder="% desconto" value={form.discountPercent} onChange={(e) => setForm({ ...form, discountPercent: e.target.value })} />
               </div>
-              <Input placeholder="URL do logo" value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })} />
-              <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
+              <div className="space-y-2">
+                <Label>Logo da Loja</Label>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
+                    {form.logoUrl ? <img src={form.logoUrl} alt="Preview" className="w-full h-full object-contain" /> : <Store className="h-6 w-6 text-muted-foreground" />}
+                  </div>
+                  <div className="flex-1">
+                    <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} className="text-xs" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isUploading ? "Enviando..." : "Upload de arquivo (PNG, JPG)"}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2 py-2">
+                <Checkbox id="isActive" checked={form.isActive} onCheckedChange={(checked) => setForm({ ...form, isActive: checked === true })} />
+                <Label htmlFor="isActive" className="text-sm font-medium leading-none cursor-pointer">Parceria Ativa (exibir no site)</Label>
+              </div>
+
+              <Button onClick={handleSave} disabled={isSaving || isUploading} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
                 {isSaving ? "Salvando..." : "Salvar"}
               </Button>
             </div>
