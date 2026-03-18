@@ -15,14 +15,14 @@ const Footer = () => {
 
           <div>
             <h4 className="font-heading font-semibold text-primary-foreground mb-5 text-sm tracking-wide uppercase">Navegação</h4>
-            <ul className="space-y-3 text-sm text-primary-foreground/60">
-              <li><a href="#sobre" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Sobre Nós <ArrowUpRight className="h-3 w-3" /></a></li>
-              <li><a href="#eventos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Eventos <ArrowUpRight className="h-3 w-3" /></a></li>
-              <li><a href="#livro" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Clube do Livro <ArrowUpRight className="h-3 w-3" /></a></li>
-              <li><a href="#planos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Planos <ArrowUpRight className="h-3 w-3" /></a></li>
+            <ul className="space-y-4 text-sm">
+              <li><a href="/#sobre" className="nav-link-elegant text-primary-foreground/60 transition-colors">Sobre Nós</a></li>
+              <li><a href="/#eventos" className="nav-link-elegant text-primary-foreground/60 transition-colors">Eventos</a></li>
+              <li><a href="/#livro" className="nav-link-elegant text-primary-foreground/60 transition-colors">Clube do Livro</a></li>
+              <li><a href="/#planos" className="nav-link-elegant text-primary-foreground/60 transition-colors">Planos</a></li>
               <li className="pt-2 border-t border-primary-foreground/5 mt-2">
-                <a href="/admin/login" className="text-primary hover:text-primary-foreground transition-colors flex items-center gap-1 font-medium">
-                  Área Restrita <ArrowUpRight className="h-3 w-3" />
+                <a href="/admin/login" className="nav-link-elegant text-primary hover:text-primary transition-colors font-medium">
+                  Área Restrita
                 </a>
               </li>
             </ul>

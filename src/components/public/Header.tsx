@@ -2,21 +2,24 @@ import { MouseEvent, useState, useEffect } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.webp";
 
 const navLinks = [
-  { label: "Início", href: "#inicio" },
-  { label: "Sobre", href: "#sobre" },
-  { label: "Eventos", href: "#eventos" },
-  { label: "Clube do Livro", href: "#livro" },
-  { label: "Planos", href: "#planos" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Contato", href: "#contato" },
+  { label: "Início", href: "/#inicio" },
+  { label: "Sobre", href: "/#sobre" },
+  { label: "Eventos", href: "/#eventos" },
+  { label: "Clube do Livro", href: "/#livro" },
+  { label: "Planos", href: "/#planos" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Contato", href: "/contato" },
 ];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -25,68 +28,70 @@ const Header = () => {
   }, []);
 
   const handleSmoothScroll = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    event.preventDefault();
-    const targetId = href.replace("#", "");
-    
-    if (targetId === "inicio") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      setIsOpen(false);
-      return;
-    }
+    const isScrollLink = href.startsWith("/#");
+    const targetId = href.replace("/#", "");
 
-    const element = document.getElementById(targetId);
-    if (element) {
-      // Close menu first in mobile to ensure layout is stable
-      const wasOpen = isOpen;
-      setIsOpen(false);
+    if (isScrollLink) {
+      event.preventDefault();
       
-      const yOffset = -80;
-      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-      
-      // Small timeout if it was open on mobile to let the layout settle
-      if (wasOpen) {
-        setTimeout(() => {
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }, 50);
-      } else {
+      if (location.pathname !== "/") {
+        navigate(href);
+        return;
+      }
+
+      if (targetId === "inicio") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setIsOpen(false);
+        return;
+      }
+
+      const element = document.getElementById(targetId);
+      if (element) {
+        setIsOpen(false);
+        const yOffset = -80;
+        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
         window.scrollTo({ top: y, behavior: "smooth" });
       }
+    } else {
+      setIsOpen(false);
     }
   };
 
   const scrollToSection = (id: string) => {
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       setIsOpen(false);
       const yOffset = -80;
       const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-      setTimeout(() => {
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }, 50);
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass border-b border-border shadow-sm" : "bg-transparent"}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || location.pathname !== "/" ? "glass border-b border-border shadow-sm" : "bg-transparent"}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <a 
-          href="#inicio" 
-          onClick={(e) => handleSmoothScroll(e, "#inicio")}
+        <Link 
+          to="/" 
+          onClick={(e: any) => handleSmoothScroll(e, "/#inicio")}
           className="flex items-center gap-2 shrink-0"
         >
           <img src={logo} alt="Club Vamos Juntas" className="h-9 w-auto" />
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
-              href={link.href}
-              onClick={(e) => handleSmoothScroll(e, link.href)}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 rounded-full hover:bg-secondary transition-all duration-200"
+              to={link.href}
+              onClick={(e: any) => handleSmoothScroll(e, link.href)}
+              className="text-sm font-medium nav-link-elegant mx-3 py-2"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
           <Button size="sm" onClick={() => scrollToSection("planos")} className="ml-2 rounded-full px-5 gradient-primary border-0 text-primary-foreground shadow-md hover:shadow-lg transition-shadow">
             Faça Parte <ArrowRight className="ml-1 h-3.5 w-3.5" />
@@ -108,14 +113,14 @@ const Header = () => {
           >
             <nav className="flex flex-col p-4 gap-1">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
-                  href={link.href}
-                  onClick={(e) => handleSmoothScroll(e, link.href)}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground py-3 px-4 rounded-xl hover:bg-secondary transition-colors"
+                  to={link.href}
+                  onClick={(e: any) => handleSmoothScroll(e, link.href)}
+                  className="text-sm font-medium nav-link-elegant py-2.5 px-4"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <Button onClick={() => scrollToSection("planos")} className="gradient-primary border-0 text-primary-foreground rounded-full mt-3 shadow-md">
                 Faça Parte <ArrowRight className="ml-1 h-3.5 w-3.5" />

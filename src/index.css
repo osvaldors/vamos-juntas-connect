@@ -129,4 +129,24 @@
   .shadow-glow {
     box-shadow: 0 0 40px -10px hsl(346 65% 47% / 0.2);
   }
+
+  .nav-link-elegant {
+    @apply relative text-muted-foreground transition-colors duration-300 hover:text-foreground;
+    display: inline-block;
+  }
+
+  .nav-link-elegant::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+
+  .nav-link-elegant:hover::after {
+    width: 100%;
+  }
 }
