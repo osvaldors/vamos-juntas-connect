@@ -24,11 +24,32 @@ const Header = () => {
   }, []);
 
   const handleSmoothScroll = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    event.preventDefault();
     const targetId = href.replace("#", "");
+    
+    if (targetId === "inicio") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setIsOpen(false);
+      return;
+    }
+
     const element = document.getElementById(targetId);
     if (element) {
-      event.preventDefault();
-      const yOffset = -72;
+      const yOffset = -80;
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      
+      // Close mobile menu
+      if (isOpen) {
+        setTimeout(() => setIsOpen(false), 150);
+      }
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -80;
       const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
       setIsOpen(false);
@@ -53,7 +74,7 @@ const Header = () => {
               {link.label}
             </a>
           ))}
-          <Button size="sm" className="ml-2 rounded-full px-5 gradient-primary border-0 text-primary-foreground shadow-md hover:shadow-lg transition-shadow">
+          <Button size="sm" onClick={() => scrollToSection("planos")} className="ml-2 rounded-full px-5 gradient-primary border-0 text-primary-foreground shadow-md hover:shadow-lg transition-shadow">
             Faça Parte <ArrowRight className="ml-1 h-3.5 w-3.5" />
           </Button>
         </nav>
@@ -82,7 +103,7 @@ const Header = () => {
                   {link.label}
                 </a>
               ))}
-              <Button className="gradient-primary border-0 text-primary-foreground rounded-full mt-3 shadow-md">
+              <Button onClick={() => scrollToSection("planos")} className="gradient-primary border-0 text-primary-foreground rounded-full mt-3 shadow-md">
                 Faça Parte <ArrowRight className="ml-1 h-3.5 w-3.5" />
               </Button>
             </nav>

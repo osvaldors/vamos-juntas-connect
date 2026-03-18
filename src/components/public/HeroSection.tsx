@@ -9,6 +9,15 @@ const HeroSection = () => {
   const { banners } = useData();
   const [current, setCurrent] = useState(0);
 
+  const handleSmoothScroll = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -72;
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
   const activeBanners = banners.length > 0 ? banners : [{ id: "fallback", title: "Juntas, somos\nimbatíveis.", subtitle: "Um clube por e para mulheres que querem crescer, conectar e viver com propósito.", imageUrl: heroBg, cta: "Quero Fazer Parte" }];
 
   const next = useCallback(() => setCurrent((c) => (c + 1) % activeBanners.length), [activeBanners.length]);
@@ -75,6 +84,7 @@ const HeroSection = () => {
               <div className="flex flex-wrap gap-4">
                 <Button
                   size="lg"
+                  onClick={() => handleSmoothScroll("planos")}
                   className="rounded-full px-8 text-base gradient-primary border-0 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   {banner.cta} <ArrowRight className="ml-2 h-5 w-5" />
@@ -82,6 +92,7 @@ const HeroSection = () => {
                 <Button
                   size="lg"
                   variant="outline"
+                  onClick={() => handleSmoothScroll("sobre")}
                   className="rounded-full px-8 text-base border-primary-foreground/30 text-primary-foreground bg-primary-foreground/5 backdrop-blur-sm hover:bg-primary-foreground/15 transition-all"
                 >
                   Conhecer o Clube
