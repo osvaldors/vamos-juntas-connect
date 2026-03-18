@@ -20,6 +20,11 @@ const Footer = () => {
               <li><a href="#eventos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Eventos <ArrowUpRight className="h-3 w-3" /></a></li>
               <li><a href="#livro" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Clube do Livro <ArrowUpRight className="h-3 w-3" /></a></li>
               <li><a href="#planos" className="hover:text-primary-foreground transition-colors flex items-center gap-1">Planos <ArrowUpRight className="h-3 w-3" /></a></li>
+              <li className="pt-2 border-t border-primary-foreground/5 mt-2">
+                <a href="/admin/login" className="text-primary hover:text-primary-foreground transition-colors flex items-center gap-1 font-medium">
+                  Área Restrita <ArrowUpRight className="h-3 w-3" />
+                </a>
+              </li>
             </ul>
           </div>
 
