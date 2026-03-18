@@ -6,11 +6,12 @@ import { useData } from "@/contexts/DataContext";
 const PartnersCarousel = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const { partners } = useData();
+  const { partners, loading } = useData();
 
   const activePartners = partners.filter((p) => p.isActive);
 
-  if (activePartners.length === 0) return null;
+  // Only hide the section once loading is done and there are truly no active partners
+  if (!loading && activePartners.length === 0) return null;
 
   return (
     <section className="py-24 bg-muted" ref={ref}>

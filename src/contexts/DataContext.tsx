@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import heroBg from "@/assets/hero-bg.jpg";
 
 // Types matching DB schema
@@ -68,6 +69,8 @@ interface DataContextType {
   partners: Partner[];
   faqs: FAQ[];
   loading: boolean;
+  error: string | null;
+  initialLoadDone: boolean;
   refetch: () => Promise<void>;
   // CRUD helpers
   addBanner: (b: Omit<Banner, "id">) => Promise<void>;
@@ -106,6 +109,52 @@ const mapBook = (r: any): Book => ({ id: r.id, title: r.title, author: r.author 
 const mapPartner = (r: any): Partner => ({ id: r.id, name: r.name, category: r.category || "", description: r.description || "", website: r.website || "", discountCode: r.discount_code || "", discountPercent: r.discount_percent || "", logoUrl: r.logo_url || "", isActive: r.is_active ?? true });
 const mapFaq = (r: any): FAQ => ({ id: r.id, question: r.question, answer: r.answer });
 
+type TableName = keyof Database["public"]["Tables"];
+
+// Helper: fetch a single table with retry and timeout
+async function fetchTable<T>(
+  table: TableName,
+  orderBy: string,
+  mapper: (r: any) => T,
+  maxRetries = 3,
+  timeoutMs = 10000,
+): Promise<{ data: T[]; error: string | null }> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+      const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .order(orderBy)
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeout);
+
+      if (error) {
+        console.warn(`[DataContext] Erro ao carregar ${table} (tentativa ${attempt}/${maxRetries}):`, error.message);
+        if (attempt === maxRetries) {
+          return { data: [], error: error.message };
+        }
+        // Exponential backoff: 500ms, 1000ms, 2000ms
+        await new Promise((res) => setTimeout(res, 500 * Math.pow(2, attempt - 1)));
+        continue;
+      }
+
+      return { data: (data || []).map(mapper), error: null };
+    } catch (err: any) {
+      const msg = err?.name === "AbortError" ? `Timeout ao carregar ${table}` : (err?.message || "Erro desconhecido");
+      console.warn(`[DataContext] Exceção ao carregar ${table} (tentativa ${attempt}/${maxRetries}):`, msg);
+      if (attempt === maxRetries) {
+        return { data: [], error: msg };
+      }
+      await new Promise((res) => setTimeout(res, 500 * Math.pow(2, attempt - 1)));
+    }
+  }
+  return { data: [], error: "Falha após todas as tentativas" };
+}
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -114,31 +163,52 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const fetchingRef = useRef(false);
 
   const refetch = useCallback(async () => {
-    const [b, m, e, bk, p, f] = await Promise.all([
-      supabase.from("banners").select("*").order("created_at"),
-      supabase.from("members").select("*").order("created_at"),
-      supabase.from("events").select("*").order("event_date"),
-      supabase.from("books").select("*").order("created_at"),
-      supabase.from("partners").select("*").order("created_at"),
-      supabase.from("faqs").select("*").order("created_at"),
-    ]);
+    // Prevent concurrent fetches
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
 
-    if (b.error) console.error("Erro ao carregar banners:", b.error.message);
-    if (m.error) console.error("Erro ao carregar membros:", m.error.message);
-    if (e.error) console.error("Erro ao carregar eventos:", e.error.message);
-    if (bk.error) console.error("Erro ao carregar livros:", bk.error.message);
-    if (p.error) console.error("Erro ao carregar parceiros:", p.error.message);
-    if (f.error) console.error("Erro ao carregar FAQs:", f.error.message);
+    try {
+      setError(null);
 
-    setBanners((b.data || []).map(mapBanner));
-    setMembers((m.data || []).map(mapMember));
-    setEvents((e.data || []).map(mapEvent));
-    setBooks((bk.data || []).map(mapBook));
-    setPartners((p.data || []).map(mapPartner));
-    setFaqs((f.data || []).map(mapFaq));
-    setLoading(false);
+      // Fetch all tables in parallel, but each with its own retry/timeout
+      const [b, m, e, bk, p, f] = await Promise.all([
+        fetchTable("banners", "created_at", mapBanner),
+        fetchTable("members", "created_at", mapMember),
+        fetchTable("events", "event_date", mapEvent),
+        fetchTable("books", "created_at", mapBook),
+        fetchTable("partners", "created_at", mapPartner),
+        fetchTable("faqs", "created_at", mapFaq),
+      ]);
+
+      // Update state with whatever data we got (partial success is better than nothing)
+      setBanners(b.data);
+      setMembers(m.data);
+      setEvents(e.data);
+      setBooks(bk.data);
+      setPartners(p.data);
+      setFaqs(f.data);
+
+      // Collect errors
+      const errors = [b, m, e, bk, p, f]
+        .filter((r) => r.error)
+        .map((r) => r.error);
+      if (errors.length > 0) {
+        setError(`Falha ao carregar: ${errors.join("; ")}`);
+      }
+    } catch (err: any) {
+      console.error("[DataContext] Erro inesperado no refetch:", err);
+      setError(err?.message || "Erro inesperado ao carregar dados");
+    } finally {
+      // ALWAYS set loading to false — this was the critical bug
+      setLoading(false);
+      setInitialLoadDone(true);
+      fetchingRef.current = false;
+    }
   }, []);
 
   useEffect(() => { refetch(); }, [refetch]);
@@ -315,7 +385,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <DataContext.Provider value={{
-      banners, members, events, books, partners, faqs, loading, refetch,
+      banners, members, events, books, partners, faqs, loading, error, initialLoadDone, refetch,
       addBanner, updateBanner, deleteBanner,
       addMember, updateMember, deleteMember,
       addEvent, updateEvent, deleteEvent,

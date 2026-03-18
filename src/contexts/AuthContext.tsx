@@ -37,12 +37,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Safety timeout: if auth takes too long, unblock the UI
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 10000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await checkAdmin(session.user.id);
+          try {
+            await checkAdmin(session.user.id);
+          } catch (err) {
+            console.warn("Erro ao verificar admin (auth change):", err);
+            setIsAdmin(false);
+          }
         } else {
           setIsAdmin(false);
         }
@@ -54,12 +64,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await checkAdmin(session.user.id);
+        try {
+          await checkAdmin(session.user.id);
+        } catch (err) {
+          console.warn("Erro ao verificar admin (get session):", err);
+          setIsAdmin(false);
+        }
       }
+      setLoading(false);
+    }).catch((err) => {
+      console.warn("Erro ao obter sessão:", err);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

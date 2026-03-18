@@ -8,7 +8,7 @@ import bookClubImg from "@/assets/book-club.jpg";
 const BookClubSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const { books } = useData();
+  const { books, loading } = useData();
 
   const currentBook = books.find((b) => b.status === "current") || books[0];
 
@@ -18,7 +18,8 @@ const BookClubSection = () => {
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" });
   };
 
-  if (!currentBook) return null;
+  // Only hide section when we're done loading and have no books
+  if (!loading && !currentBook) return null;
 
   return (
     <section id="livro" className="py-28 bg-card relative overflow-hidden" ref={ref}>
