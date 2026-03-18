@@ -12,7 +12,7 @@ const HeroSection = () => {
   const handleSmoothScroll = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -72;
+      const yOffset = -70;
       const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }

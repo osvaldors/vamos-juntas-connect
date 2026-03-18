@@ -8,8 +8,9 @@ const navLinks = [
   { label: "Início", href: "#inicio" },
   { label: "Sobre", href: "#sobre" },
   { label: "Eventos", href: "#eventos" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Clube do Livro", href: "#livro" },
   { label: "Planos", href: "#planos" },
+  { label: "FAQ", href: "#faq" },
   { label: "Contato", href: "#contato" },
 ];
 
@@ -35,13 +36,20 @@ const Header = () => {
 
     const element = document.getElementById(targetId);
     if (element) {
+      // Close menu first in mobile to ensure layout is stable
+      const wasOpen = isOpen;
+      setIsOpen(false);
+      
       const yOffset = -80;
       const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
       
-      // Close mobile menu
-      if (isOpen) {
-        setTimeout(() => setIsOpen(false), 150);
+      // Small timeout if it was open on mobile to let the layout settle
+      if (wasOpen) {
+        setTimeout(() => {
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }, 50);
+      } else {
+        window.scrollTo({ top: y, behavior: "smooth" });
       }
     }
   };
@@ -49,17 +57,23 @@ const Header = () => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
+      setIsOpen(false);
       const yOffset = -80;
       const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-      setIsOpen(false);
+      setTimeout(() => {
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }, 50);
     }
   };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass border-b border-border shadow-sm" : "bg-transparent"}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <a href="#inicio" className="flex items-center gap-2 shrink-0">
+        <a 
+          href="#inicio" 
+          onClick={(e) => handleSmoothScroll(e, "#inicio")}
+          className="flex items-center gap-2 shrink-0"
+        >
           <img src={logo} alt="Club Vamos Juntas" className="h-9 w-auto" />
         </a>
 
