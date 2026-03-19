@@ -24,7 +24,7 @@ const BookClubSection = () => {
   return (
     <section id="livro" className="py-28 bg-card relative overflow-hidden" ref={ref}>
       <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl translate-y-1/2 -translate-x-1/2" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -37,7 +37,7 @@ const BookClubSection = () => {
               <img
                 src={currentBook.coverUrl || bookClubImg}
                 alt="Clube do Livro"
-                className="rounded-2xl shadow-2xl w-full aspect-[4/5] object-cover relative z-10"
+                className="rounded-2xl shadow-2xl w-full  object-cover relative z-10"
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -49,7 +49,7 @@ const BookClubSection = () => {
                   <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-lg font-heading font-bold text-foreground">45+</p>
+                  <p className="text-lg font-heading font-bold text-foreground">5+</p>
                   <p className="text-xs text-muted-foreground">livros lidos juntas</p>
                 </div>
               </motion.div>
@@ -81,7 +81,7 @@ const BookClubSection = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button 
+              <Button
                 className="gradient-primary border-0 text-primary-foreground rounded-full px-7 shadow-md hover:shadow-lg transition-all hover:scale-105"
                 asChild
               >

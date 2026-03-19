@@ -10,7 +10,7 @@ import BenefitsSection from "@/components/public/BenefitsSection";
 import PricingSection from "@/components/public/PricingSection";
 import FAQSection from "@/components/public/FAQSection";
 import TestimonialsSection from "@/components/public/TestimonialsSection";
-import NewsletterSection from "@/components/public/NewsletterSection";
+// import NewsletterSection from "@/components/public/NewsletterSection";
 import Footer from "@/components/public/Footer";
 
 const LoadingScreen = () => (
@@ -56,7 +56,7 @@ const Index = () => {
         <PricingSection />
         <FAQSection />
         <TestimonialsSection />
-        <NewsletterSection />
+        {/* <NewsletterSection /> */}
       </main>
       <Footer />
     </div>
