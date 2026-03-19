@@ -2,9 +2,21 @@ import { Users, Image, Store, CalendarDays, BookOpen, HelpCircle, TrendingUp, Qu
 import { Link } from "react-router-dom";
 import { useData } from "@/contexts/DataContext";
 import { motion } from "framer-motion";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
-  const { banners, members, events, books, partners, faqs, testimonials } = useData();
+  const { banners, members, events, books, partners, faqs, testimonials, siteSettings, updateSettings } = useData();
+  const { toast } = useToast();
+
+  const handleToggleMaintenance = async (checked: boolean) => {
+    try {
+      await updateSettings(checked);
+      toast({ title: checked ? "Modo manutenção ativado" : "Modo manutenção desativado" });
+    } catch (error) {
+      toast({ title: "Erro ao atualizar status", variant: "destructive" });
+    }
+  };
 
   const cards = [
     { label: "Banners", icon: Image, count: banners.length, href: "/admin/banners", gradient: "from-primary to-accent" },
@@ -18,9 +30,22 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-heading font-bold text-foreground">Dashboard</h2>
-        <p className="text-sm text-muted-foreground mt-1">Visão geral do conteúdo do seu clube.</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-heading font-bold text-foreground">Dashboard</h2>
+          <p className="text-sm text-muted-foreground mt-1">Visão geral do conteúdo do seu clube.</p>
+        </div>
+        
+        <div className="bg-card border border-border px-4 py-3 rounded-xl flex items-center justify-between shadow-sm min-w-[280px]">
+          <div>
+            <p className="font-semibold text-sm">Modo Manutenção</p>
+            <p className="text-xs text-muted-foreground">Ocultar o site do público (use ?admin=1 na url da home para visualizar)</p>
+          </div>
+          <Switch 
+            checked={!!siteSettings?.maintenanceMode}
+            onCheckedChange={handleToggleMaintenance}
+          />
+        </div>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {cards.map((card, i) => (

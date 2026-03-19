@@ -70,6 +70,11 @@ export interface Testimonial {
   isActive: boolean;
 }
 
+export interface SiteSettings {
+  id: number;
+  maintenanceMode: boolean;
+}
+
 interface DataContextType {
   banners: Banner[];
   members: Member[];
@@ -78,10 +83,12 @@ interface DataContextType {
   partners: Partner[];
   faqs: FAQ[];
   testimonials: Testimonial[];
+  siteSettings: SiteSettings | null;
   loading: boolean;
   error: string | null;
   initialLoadDone: boolean;
   refetch: () => Promise<void>;
+  updateSettings: (mode: boolean) => Promise<void>;
   // CRUD helpers
   addBanner: (b: Omit<Banner, "id">) => Promise<void>;
   updateBanner: (id: string, b: Partial<Banner>) => Promise<void>;
@@ -122,8 +129,9 @@ const mapBook = (r: any): Book => ({ id: r.id, title: r.title, author: r.author 
 const mapPartner = (r: any): Partner => ({ id: r.id, name: r.name, category: r.category || "", description: r.description || "", website: r.website || "", discountCode: r.discount_code || "", discountPercent: r.discount_percent || "", logoUrl: r.logo_url || "", isActive: r.is_active ?? true });
 const mapFaq = (r: any): FAQ => ({ id: r.id, question: r.question, answer: r.answer });
 const mapTestimonial = (r: any): Testimonial => ({ id: r.id, name: r.name, role: r.role || "", text: r.text || "", isActive: r.is_active ?? true });
+const mapSettings = (r: any): SiteSettings => ({ id: r.id, maintenanceMode: r.is_maintenance ?? false });
 
-type TableName = keyof Database["public"]["Tables"];
+type TableName = keyof Database["public"]["Tables"] | "settings";
 
 // Helper: fetch a single table with retry and timeout
 async function fetchTable<T>(
@@ -139,7 +147,7 @@ async function fetchTable<T>(
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       const { data, error } = await supabase
-        .from(table)
+        .from(table as any)
         .select("*")
         .order(orderBy)
         .abortSignal(controller.signal);
@@ -177,6 +185,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -191,7 +200,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       // Fetch all tables in parallel, but each with its own retry/timeout
-      const [b, m, e, bk, p, f, t] = await Promise.all([
+      const [b, m, e, bk, p, f, t, s] = await Promise.all([
         fetchTable("banners", "created_at", mapBanner),
         fetchTable("members", "created_at", mapMember),
         fetchTable("events", "event_date", mapEvent),
@@ -199,6 +208,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         fetchTable("partners", "created_at", mapPartner),
         fetchTable("faqs", "created_at", mapFaq),
         fetchTable("testimonials", "created_at", mapTestimonial),
+        fetchTable("settings", "id", mapSettings),
       ]);
 
       // Update state with whatever data we got (partial success is better than nothing)
@@ -209,6 +219,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setPartners(p.data);
       setFaqs(f.data);
       setTestimonials(t.data);
+      if (s.data.length > 0) setSiteSettings(s.data[0]);
 
       // Collect errors
       const errors = [b, m, e, bk, p, f, t]
@@ -229,6 +240,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => { refetch(); }, [refetch]);
+
+  const updateSettings = async (maintenanceMode: boolean) => {
+    const { error } = await supabase.from("settings" as any).update({ is_maintenance: maintenanceMode }).eq("id", 1);
+    if (error) throw error;
+    await refetch();
+  };
 
   // CRUD helpers
   const addBanner = async (b: Omit<Banner, "id">) => {
@@ -425,7 +442,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <DataContext.Provider value={{
-      banners, members, events, books, partners, faqs, testimonials, loading, error, initialLoadDone, refetch,
+      banners, members, events, books, partners, faqs, testimonials, siteSettings, loading, error, initialLoadDone, refetch, updateSettings,
       addBanner, updateBanner, deleteBanner,
       addMember, updateMember, deleteMember,
       addEvent, updateEvent, deleteEvent,
