@@ -1,6 +1,6 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
-import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus, Map } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus, Map, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData, AppEvent } from "@/contexts/DataContext";
 import { useToast } from "@/hooks/use-toast";
@@ -14,40 +14,76 @@ const EventModal = ({ event, onClose }: { event: AppEvent; onClose: () => void }
     return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
   };
 
-  const formatDateForGoogle = (date: string, time: string) => {
-    const d = new Date(`${date}T${time || "00:00"}:00`);
-    return d.toISOString().replace(/-|:|\.\d{3}/g, "");
-  };
+  const pad = (n: number) => n.toString().padStart(2, '0');
 
   const addToGoogleCalendar = () => {
-    const startDate = formatDateForGoogle(event.date, event.time);
-    // Add 1 hour as default duration
-    const endD = new Date(`${event.date}T${event.time || "00:00"}:00`);
-    endD.setHours(endD.getHours() + 1);
-    const endDate = endD.toISOString().replace(/-|:|\.\d{3}/g, "");
+    try {
+      const isAllDay = !event.time;
+      // Tratar a data como local (ignorando fuso ao criar)
+      const parts = event.date.split('-');
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      
+      let hours = 0;
+      let minutes = 0;
+      if (!isAllDay) {
+        const timeParts = event.time.split(':');
+        hours = parseInt(timeParts[0], 10);
+        minutes = parseInt(timeParts[1], 10);
+      }
+      
+      const d = new Date(year, month, day, hours, minutes, 0);
+      
+      let startStr = "";
+      let endStr = "";
+      
+      if (isAllDay) {
+        startStr = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+        const endD = new Date(d);
+        endD.setDate(endD.getDate() + 1);
+        endStr = `${endD.getFullYear()}${pad(endD.getMonth() + 1)}${pad(endD.getDate())}`;
+      } else {
+        startStr = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+        const endD = new Date(d);
+        endD.setHours(endD.getHours() + 1);
+        endStr = `${endD.getFullYear()}${pad(endD.getMonth() + 1)}${pad(endD.getDate())}T${pad(endD.getHours())}${pad(endD.getMinutes())}00`;
+      }
 
-    const params = new URLSearchParams({
-      action: "TEMPLATE",
-      text: event.title,
-      details: event.description || "",
-      location: event.location || "",
-      dates: `${startDate}/${endDate}`,
-    });
+      const params = new URLSearchParams({
+        action: "TEMPLATE",
+        text: event.title,
+        details: event.description || "",
+        location: event.mapsLink || event.location || "",
+        dates: `${startStr}/${endStr}`,
+      });
 
-    window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank");
+      window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank");
+    } catch (error) {
+      toast({ title: "Erro", description: "Não foi possível gerar o link da agenda.", variant: "destructive" });
+    }
   };
 
-  const handleShare = async () => {
-    const text = `📅 ${event.title}\n🗓 ${formatDate(event.date)}${event.time ? ` às ${event.time}` : ""}\n📍 ${event.location || ""}\n\nVamos Juntas Club`;
-    if (navigator.share) {
+  const handleShare = async (platform: 'whatsapp' | 'instagram') => {
+    const text = `📅 ${event.title}\n🗓 ${formatDate(event.date)}${event.time ? ` às ${event.time}` : ""}\n📍 ${event.location || "Online"}\n\nConheça o Vamos Juntas Club!`;
+    
+    if (platform === 'whatsapp') {
+      const urlText = encodeURIComponent(text);
+      window.open(`https://api.whatsapp.com/send?text=${urlText}`, '_blank');
+    } else if (platform === 'instagram') {
       try {
-        await navigator.share({ title: event.title, text });
-      } catch {
-        // User cancelled
+        await navigator.clipboard.writeText(text);
+        toast({ 
+          title: "Copiado para o Story!", 
+          description: "O texto foi copiado. Abra o Instagram e cole no seu Story.",
+        });
+        setTimeout(() => {
+          // Try to open Instagram camera (works on some mobile devices, fails gracefully on desktop)
+          window.location.href = "instagram://story-camera";
+        }, 1500);
+      } catch (err) {
+        toast({ title: "Erro", description: "Não foi possível copiar o texto.", variant: "destructive" });
       }
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast({ title: "Evento copiado!", description: "Informações copiadas para a área de transferência." });
     }
   };
 
@@ -139,21 +175,30 @@ const EventModal = ({ event, onClose }: { event: AppEvent; onClose: () => void }
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3">
             <Button
               onClick={addToGoogleCalendar}
-              className="flex-1 gradient-primary border-0 text-primary-foreground rounded-full h-11 font-semibold shadow-md shadow-primary/20 text-sm"
+              className="w-full gradient-primary border-0 text-primary-foreground rounded-full h-11 font-semibold shadow-md shadow-primary/20 text-sm"
             >
               <CalendarPlus className="h-4 w-4 mr-2" />
-              Agenda Google
+              Adicionar à Agenda
             </Button>
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              className="rounded-full h-11 px-4"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => handleShare('whatsapp')}
+                variant="outline"
+                className="w-full rounded-full h-11 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary"
+              >
+                <Share2 className="h-4 w-4 mr-2" /> WhatsApp
+              </Button>
+              <Button
+                onClick={() => handleShare('instagram')}
+                variant="outline"
+                className="w-full rounded-full h-11 border-accent/20 text-accent hover:bg-accent/5 hover:text-accent"
+              >
+                <Instagram className="h-4 w-4 mr-2" /> Instagram
+              </Button>
+            </div>
           </div>
         </div>
       </motion.div>
