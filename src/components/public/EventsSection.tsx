@@ -187,6 +187,7 @@ const EventsSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { events } = useData();
   const [selectedEvent, setSelectedEvent] = useState<AppEvent | null>(null);
+  const [filterMonth, setFilterMonth] = useState<string>("Todos");
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -194,11 +195,37 @@ const EventsSection = () => {
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const categoryColors: Record<string, string> = {
-    "Social": "bg-primary/10 text-primary",
-    "Workshop": "bg-accent/10 text-accent",
-    "Clube do Livro": "bg-yellow-500/10 text-yellow-700",
+  const getMonthYear = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   };
+
+  const getDay = (dateStr: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr + "T00:00:00").getDate().toString().padStart(2, "0");
+  };
+
+  const getMonthShort = (dateStr: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr + "T00:00:00").toLocaleDateString("pt-BR", { month: "short" }).substring(0, 3);
+  };
+
+  const categoryColors: Record<string, string> = {
+    "Social": "text-primary bg-primary/10",
+    "Workshop": "text-accent bg-accent/10",
+    "Clube do Livro": "text-yellow-600 bg-yellow-500/10",
+  };
+
+  const upcomingEvents = events.filter(e => new Date(e.date + "T00:00:00") >= new Date(new Date().setHours(0,0,0,0)));
+  
+  const uniqueMonths = Array.from(
+    new Set(upcomingEvents.map(e => getMonthYear(e.date)).filter(Boolean))
+  );
+
+  const filteredEvents = filterMonth === "Todos" 
+    ? upcomingEvents 
+    : upcomingEvents.filter(e => getMonthYear(e.date) === filterMonth);
 
   return (
     <section id="eventos" className="py-28 bg-muted relative" ref={ref}>
@@ -215,62 +242,77 @@ const EventsSection = () => {
           </h2>
         </motion.div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {events.slice(0, 6).map((event, i) => (
+        {uniqueMonths.length > 1 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+            <Button 
+              variant={filterMonth === "Todos" ? "default" : "outline"} 
+              onClick={() => setFilterMonth("Todos")}
+              className={`rounded-full h-9 px-5 text-xs font-semibold transition-all ${filterMonth === 'Todos' ? 'gradient-primary border-0 text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Todos
+            </Button>
+            {uniqueMonths.map(m => (
+              <Button 
+                key={m} 
+                variant={filterMonth === m ? "default" : "outline"} 
+                onClick={() => setFilterMonth(m)}
+                className={`rounded-full h-9 px-5 text-xs font-semibold capitalize transition-all ${filterMonth === m ? 'gradient-primary border-0 text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                {m}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredEvents.map((event, i) => (
             <motion.div
               key={event.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
+              transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
               onClick={() => setSelectedEvent(event)}
-              className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              className="group bg-card rounded-2xl border border-border/60 p-4 hover:border-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center gap-4 relative overflow-hidden"
             >
-              <div className="p-6 pb-3">
-                <span className={`text-[11px] font-semibold px-3 py-1 rounded-full ${categoryColors[event.category] || "bg-secondary text-secondary-foreground"}`}>
+              {/* Left calendar block */}
+              <div className="flex flex-col items-center justify-center bg-muted/50 rounded-xl w-[3.5rem] h-[3.5rem] shrink-0 border border-border/50 group-hover:bg-primary/5 group-hover:border-primary/20 transition-colors">
+                <span className="text-[9px] font-bold text-primary uppercase leading-none mb-1 tracking-wider">{getMonthShort(event.date)}</span>
+                <span className="text-xl font-heading font-black text-foreground leading-none">{getDay(event.date)}</span>
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 min-w-0 py-0.5">
+                <p className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${categoryColors[event.category] ? categoryColors[event.category].split(' ')[0] : "text-muted-foreground"}`}>
                   {event.category}
-                </span>
-              </div>
-              <div className="px-6 pb-6">
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-4 leading-snug">{event.title}</h3>
-                <div className="space-y-2.5 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2.5">
-                    <Calendar className="h-4 w-4 text-primary shrink-0" />
-                    <span>{formatDate(event.date)}</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Clock className="h-4 w-4 text-primary shrink-0" />
-                    <span>{event.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <span>{event.location}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-5">
-                  <Button variant="ghost" className="text-primary hover:text-primary p-0 h-auto font-semibold text-sm group-hover:gap-3 transition-all pointer-events-none">
-                    Ver detalhes <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                  
-                  {event.mapsLink && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="rounded-full h-8 px-3 text-xs bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 z-10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(event.mapsLink, "_blank");
-                      }}
-                    >
-                      <Map className="h-3 w-3 mr-1.5" /> Como Chegar
-                    </Button>
-                  )}
+                </p>
+                <h3 className="text-sm font-heading font-bold text-foreground truncate mb-1.5 leading-tight">{event.title}</h3>
+                
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  {event.time && <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" /> {event.time}</span>}
+                  {event.location && <span className="flex items-center gap-1 truncate"><MapPin className="h-3 w-3 shrink-0" /> <span className="truncate">{event.location}</span></span>}
                 </div>
               </div>
+
+              {/* Action */}
+              {event.mapsLink && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="rounded-full h-8 w-8 text-muted-foreground hover:text-accent hover:bg-accent/10 shrink-0 z-10 -mr-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(event.mapsLink, "_blank");
+                  }}
+                  title="Como Chegar"
+                >
+                  <Map className="h-4 w-4" />
+                </Button>
+              )}
             </motion.div>
           ))}
         </div>
 
-        {events.length === 0 && (
+        {upcomingEvents.length === 0 && (
           <p className="text-center text-muted-foreground mt-8">Novos eventos em breve! Fique ligada.</p>
         )}
       </div>
