@@ -242,8 +242,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => { refetch(); }, [refetch]);
 
   const updateSettings = async (maintenanceMode: boolean) => {
-    const { error } = await supabase.from("settings" as any).upsert({ id: 1, is_maintenance: maintenanceMode });
-    if (error) throw error;
+    // Tenta atualizar
+    const { data, error: updateError } = await supabase
+      .from("settings" as any)
+      .update({ is_maintenance: maintenanceMode })
+      .eq("id", 1)
+      .select();
+
+    if (updateError) {
+      console.error("[DataContext] Erro ao atualizar settings:", updateError);
+      throw updateError;
+    }
+
+    // Se a linha não existir (tabela recém-criada vazia), faz o insert
+    if (!data || data.length === 0) {
+      const { error: insertError } = await supabase
+        .from("settings" as any)
+        .insert({ id: 1, is_maintenance: maintenanceMode });
+      
+      if (insertError) {
+        console.error("[DataContext] Erro ao inserir settings:", insertError);
+        throw insertError;
+      }
+    }
     await refetch();
   };
 

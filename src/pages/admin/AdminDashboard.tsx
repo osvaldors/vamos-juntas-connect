@@ -23,8 +23,13 @@ const AdminDashboard = () => {
     try {
       await updateSettings(checked);
       toast({ title: checked ? "Modo manutenção ativado" : "Modo manutenção desativado" });
-    } catch (error) {
-      toast({ title: "Erro ao atualizar status", variant: "destructive" });
+    } catch (error: any) {
+      console.error(error);
+      toast({ 
+        title: "Erro ao atualizar status", 
+        description: error?.message || "Erro desconhecido. Verifique no console.",
+        variant: "destructive" 
+      });
     }
   };
 
