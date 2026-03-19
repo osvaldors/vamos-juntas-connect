@@ -64,7 +64,7 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="max-w-xl py-6 md:py-10"
           >
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
@@ -72,7 +72,7 @@ const HeroSection = () => {
             >
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse-soft" />
               <span className="text-primary-foreground/90 text-xs font-medium tracking-wide uppercase">Clube Feminino • Desde 2020</span>
-            </motion.div>
+            </motion.div> */}
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-4 leading-[1.1] whitespace-pre-line tracking-tight">
               {banner.title}

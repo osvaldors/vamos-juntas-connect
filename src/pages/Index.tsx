@@ -1,6 +1,6 @@
 import { useData } from "@/contexts/DataContext";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import Header from "@/components/public/Header";
 import HeroSection from "@/components/public/HeroSection";
 import AboutSection from "@/components/public/AboutSection";
@@ -55,17 +55,7 @@ const Index = () => {
   }
 
   if (siteSettings?.maintenanceMode && !bypassed) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-          <span className="text-primary-foreground font-heading font-bold text-2xl">VJ</span>
-        </div>
-        <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-4 text-center">Site em Manutenção</h1>
-        <p className="text-muted-foreground text-center max-w-md leading-relaxed">
-          Estamos preparando novidades incríveis para o Vamos Juntas Club. Voltaremos em breve!
-        </p>
-      </div>
-    );
+    return <Navigate to="/manutencao" replace />;
   }
 
   return (

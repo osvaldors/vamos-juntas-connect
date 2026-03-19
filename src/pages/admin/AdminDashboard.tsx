@@ -4,12 +4,22 @@ import { useData } from "@/contexts/DataContext";
 import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 const AdminDashboard = () => {
   const { banners, members, events, books, partners, faqs, testimonials, siteSettings, updateSettings } = useData();
   const { toast } = useToast();
+  
+  const [isMaintained, setIsMaintained] = useState(!!siteSettings?.maintenanceMode);
+
+  useEffect(() => {
+    if (siteSettings) {
+      setIsMaintained(siteSettings.maintenanceMode);
+    }
+  }, [siteSettings]);
 
   const handleToggleMaintenance = async (checked: boolean) => {
+    setIsMaintained(checked); // Optimistic update
     try {
       await updateSettings(checked);
       toast({ title: checked ? "Modo manutenção ativado" : "Modo manutenção desativado" });
@@ -42,7 +52,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-muted-foreground">Ocultar o site do público (use ?admin=1 na url da home para visualizar)</p>
           </div>
           <Switch 
-            checked={!!siteSettings?.maintenanceMode}
+            checked={isMaintained}
             onCheckedChange={handleToggleMaintenance}
           />
         </div>

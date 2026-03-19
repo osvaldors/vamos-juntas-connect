@@ -242,7 +242,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => { refetch(); }, [refetch]);
 
   const updateSettings = async (maintenanceMode: boolean) => {
-    const { error } = await supabase.from("settings" as any).update({ is_maintenance: maintenanceMode }).eq("id", 1);
+    const { error } = await supabase.from("settings" as any).upsert({ id: 1, is_maintenance: maintenanceMode });
     if (error) throw error;
     await refetch();
   };

@@ -10,6 +10,7 @@ import PrivateRoute from "@/components/PrivateRoute";
 import Index from "./pages/Index";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import Maintenance from "./pages/Maintenance";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -44,6 +45,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/contato" element={<Contact />} />
+              <Route path="/manutencao" element={<Maintenance />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
                 <Route index element={<AdminDashboard />} />
