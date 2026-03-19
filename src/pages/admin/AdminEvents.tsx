@@ -13,14 +13,14 @@ const AdminEvents = () => {
   const { events, addEvent, updateEvent, deleteEvent } = useData();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", category: "", description: "" });
+  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", mapsLink: "", category: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
 
-  const openNew = () => { setEditingId(null); setForm({ title: "", date: "", time: "", location: "", category: "", description: "" }); setOpen(true); };
+  const openNew = () => { setEditingId(null); setForm({ title: "", date: "", time: "", location: "", mapsLink: "", category: "", description: "" }); setOpen(true); };
 
   const openEdit = (e: typeof events[0]) => {
     setEditingId(e.id);
-    setForm({ title: e.title, date: e.date, time: e.time, location: e.location, category: e.category, description: e.description });
+    setForm({ title: e.title, date: e.date, time: e.time, location: e.location, mapsLink: e.mapsLink || "", category: e.category, description: e.description });
     setOpen(true);
   };
 
@@ -78,6 +78,7 @@ const AdminEvents = () => {
                 <Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
               </div>
               <Input placeholder="Local" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              <Input placeholder="Link do Google Maps (Opcional)" value={form.mapsLink} onChange={(e) => setForm({ ...form, mapsLink: e.target.value })} />
               <Input placeholder="Categoria (ex: Social, Workshop)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
               <Textarea placeholder="Descrição" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
               <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">

@@ -1,6 +1,6 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
-import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData, AppEvent } from "@/contexts/DataContext";
 import { useToast } from "@/hooks/use-toast";
@@ -225,9 +225,25 @@ const EventsSection = () => {
                     <span>{event.location}</span>
                   </div>
                 </div>
-                <Button variant="ghost" className="mt-5 text-primary hover:text-primary p-0 h-auto font-semibold text-sm group-hover:gap-3 transition-all pointer-events-none">
-                  Ver detalhes <ArrowRight className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center justify-between mt-5">
+                  <Button variant="ghost" className="text-primary hover:text-primary p-0 h-auto font-semibold text-sm group-hover:gap-3 transition-all pointer-events-none">
+                    Ver detalhes <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                  
+                  {event.mapsLink && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="rounded-full h-8 px-3 text-xs bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(event.mapsLink, "_blank");
+                      }}
+                    >
+                      <Map className="h-3 w-3 mr-1.5" /> Como Chegar
+                    </Button>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}

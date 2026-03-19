@@ -30,6 +30,7 @@ export interface AppEvent {
   location: string;
   category: string;
   description: string;
+  mapsLink?: string;
 }
 
 export interface Book {
@@ -116,7 +117,7 @@ export const useData = () => {
 // Map DB row to frontend type
 const mapBanner = (r: any): Banner => ({ id: r.id, title: r.title, subtitle: r.subtitle || "", imageUrl: r.image_url || heroBg, cta: r.cta || "" });
 const mapMember = (r: any): Member => ({ id: r.id, name: r.name, email: r.email || "", phone: r.phone || "", role: r.role || "", photoUrl: r.photo_url || "", status: (r.status as "active" | "inactive") || "active" });
-const mapEvent = (r: any): AppEvent => ({ id: r.id, title: r.title, date: r.event_date, time: r.event_time || "", location: r.location || "", category: r.category || "", description: r.description || "" });
+const mapEvent = (r: any): AppEvent => ({ id: r.id, title: r.title, date: r.event_date, time: r.event_time || "", location: r.location || "", category: r.category || "", description: r.description || "", mapsLink: r.maps_link || "" });
 const mapBook = (r: any): Book => ({ id: r.id, title: r.title, author: r.author || "", synopsis: r.synopsis || "", meetingDate: r.meeting_date || "", buyLink: r.buy_link || "", coverUrl: r.cover_url || "", status: (r.status as Book["status"]) || "upcoming" });
 const mapPartner = (r: any): Partner => ({ id: r.id, name: r.name, category: r.category || "", description: r.description || "", website: r.website || "", discountCode: r.discount_code || "", discountPercent: r.discount_percent || "", logoUrl: r.logo_url || "", isActive: r.is_active ?? true });
 const mapFaq = (r: any): FAQ => ({ id: r.id, question: r.question, answer: r.answer });
@@ -288,6 +289,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         location: e.location,
         category: e.category,
         description: e.description,
+        maps_link: e.mapsLink,
       });
     if (error) throw error;
     await refetch();
@@ -300,6 +302,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (e.location !== undefined) update.location = e.location;
     if (e.category !== undefined) update.category = e.category;
     if (e.description !== undefined) update.description = e.description;
+    if (e.mapsLink !== undefined) update.maps_link = e.mapsLink;
     const { error } = await supabase.from("events").update(update).eq("id", id);
     if (error) throw error;
     await refetch();
