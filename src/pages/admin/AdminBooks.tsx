@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useData, Book } from "@/contexts/DataContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
 
 const AdminBooks = () => {
   const { toast } = useToast();
@@ -15,6 +17,7 @@ const AdminBooks = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", author: "", synopsis: "", meetingDate: "", buyLink: "", coverUrl: "", status: "current" as Book["status"] });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const openNew = () => { setEditingId(null); setForm({ title: "", author: "", synopsis: "", meetingDate: "", buyLink: "", coverUrl: "", status: "current" }); setOpen(true); };
 
@@ -22,6 +25,35 @@ const AdminBooks = () => {
     setEditingId(b.id);
     setForm({ title: b.title, author: b.author, synopsis: b.synopsis, meetingDate: b.meetingDate, buyLink: b.buyLink, coverUrl: b.coverUrl, status: b.status });
     setOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `books/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('club-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('club-photos')
+        .getPublicUrl(filePath);
+
+      setForm({ ...form, coverUrl: publicUrl });
+      toast({ title: "Capa carregada com sucesso!" });
+    } catch (error: any) {
+      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -74,13 +106,27 @@ const AdminBooks = () => {
               <Textarea placeholder="Sinopse" value={form.synopsis} onChange={(e) => setForm({ ...form, synopsis: e.target.value })} rows={3} />
               <Input type="date" value={form.meetingDate} onChange={(e) => setForm({ ...form, meetingDate: e.target.value })} />
               <Input placeholder="Link para compra" value={form.buyLink} onChange={(e) => setForm({ ...form, buyLink: e.target.value })} />
-              <Input placeholder="URL da capa" value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} />
-              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Book["status"] })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                <option value="current">Livro do Mês</option>
-                <option value="upcoming">Próximo</option>
-                <option value="finished">Lido</option>
-              </select>
-              <Button onClick={handleSave} disabled={isSaving} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
+              <div className="space-y-2">
+                <Label>Capa do Livro</Label>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-20 rounded-lg bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
+                    {form.coverUrl ? <img src={form.coverUrl} alt="Preview" className="w-full h-full object-cover" /> : <BookOpen className="h-6 w-6 text-muted-foreground" />}
+                  </div>
+                  <div className="flex-1">
+                    <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} className="text-xs" />
+                    <p className="text-[10px] text-muted-foreground mt-1">{isUploading ? "Enviando..." : "Upload de capa (PNG, JPG)"}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Status</Label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Book["status"] })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <option value="current">Livro do Mês</option>
+                  <option value="upcoming">Próximo</option>
+                  <option value="finished">Lido</option>
+                </select>
+              </div>
+              <Button onClick={handleSave} disabled={isSaving || isUploading} className="w-full gradient-primary border-0 text-primary-foreground rounded-full">
                 {isSaving ? "Salvando..." : "Salvar"}
               </Button>
             </div>
