@@ -1,6 +1,6 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
-import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus, Map, Instagram } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight, X, Share2, CalendarPlus, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData, AppEvent } from "@/contexts/DataContext";
 import { useToast } from "@/hooks/use-toast";
@@ -64,27 +64,10 @@ const EventModal = ({ event, onClose }: { event: AppEvent; onClose: () => void }
     }
   };
 
-  const handleShare = async (platform: 'whatsapp' | 'instagram') => {
+  const handleShare = async () => {
     const text = `📅 ${event.title}\n🗓 ${formatDate(event.date)}${event.time ? ` às ${event.time}` : ""}\n📍 ${event.location || "Online"}\n\nConheça o Vamos Juntas Club!`;
-    
-    if (platform === 'whatsapp') {
-      const urlText = encodeURIComponent(text);
-      window.open(`https://api.whatsapp.com/send?text=${urlText}`, '_blank');
-    } else if (platform === 'instagram') {
-      try {
-        await navigator.clipboard.writeText(text);
-        toast({ 
-          title: "Copiado para o Story!", 
-          description: "O texto foi copiado. Abra o Instagram e cole no seu Story.",
-        });
-        setTimeout(() => {
-          // Try to open Instagram camera (works on some mobile devices, fails gracefully on desktop)
-          window.location.href = "instagram://story-camera";
-        }, 1500);
-      } catch (err) {
-        toast({ title: "Erro", description: "Não foi possível copiar o texto.", variant: "destructive" });
-      }
-    }
+    const urlText = encodeURIComponent(text);
+    window.open(`https://api.whatsapp.com/send?text=${urlText}`, '_blank');
   };
 
   const categoryColors: Record<string, string> = {
@@ -183,20 +166,13 @@ const EventModal = ({ event, onClose }: { event: AppEvent; onClose: () => void }
               <CalendarPlus className="h-4 w-4 mr-2" />
               Adicionar à Agenda
             </Button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex gap-3">
               <Button
-                onClick={() => handleShare('whatsapp')}
+                onClick={() => handleShare()}
                 variant="outline"
                 className="w-full rounded-full h-11 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary"
               >
-                <Share2 className="h-4 w-4 mr-2" /> WhatsApp
-              </Button>
-              <Button
-                onClick={() => handleShare('instagram')}
-                variant="outline"
-                className="w-full rounded-full h-11 border-accent/20 text-accent hover:bg-accent/5 hover:text-accent"
-              >
-                <Instagram className="h-4 w-4 mr-2" /> Instagram
+                <Share2 className="h-4 w-4 mr-2" /> Compartilhar no WhatsApp
               </Button>
             </div>
           </div>
